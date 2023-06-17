@@ -20,7 +20,9 @@ members = [
 dotenv = "0.15.0"
 clap = { version = "4.3.4", features = ["derive"] }
 dotenvy = "0.15.7"
+
 vina_codegen = {path = "crates/vina_codegen"}
 vina_story = {path = "crates/vina_story"}
+vina_sd = { path = "crates/vina_sd" }
 
 

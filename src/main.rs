@@ -1,7 +1,8 @@
 use clap::Parser;
 use dotenvy::dotenv;
 use vina_codegen::generate_proj;
-use vina_story::content::*;
+use vina_sd::generate_character_art;
+use vina_story::{content::*, generate_character_prompt, generate_story};
 
 #[derive(Parser)]
 struct Cli {
@@ -10,16 +11,26 @@ struct Cli {
     out: std::path::PathBuf,
 }
 fn main() {
-    let args = Cli::parse();
-    dotenv().ok();
+    // let args = Cli::parse();
+    // dotenv().ok();
 
     let ren_path: String = std::env::var("REN_PATH").unwrap_or("renpy".to_string());
     let openai_token = std::env::var("OPENAI_KEY").expect("Could not get OPENAI_KEY");
+    let novelai_url = std::env::var("NOVELAI_URL").expect("Could not get NOVELAI_URL");
 
-    let scenes =   vec![Scene { title: "The Serendipitous Encounter".to_string(), 
-        location: Location { description: "A bustling convention center".to_string(), 
-            landmarks: "Arcade machines, colorful banners, booths showcasing games".to_string(), mood: "Buzzing with excitement and anticipation".to_string(), time_of_day: "Afternoon".to_string() }, script: vec![Dialogue { speaker: "Akira".to_string(), content: "Akira: *nervously approaches Yumi's game booth* Hi, I couldn't help but be drawn to your captivating visuals. Your game looks amazing!".to_string() }, Dialogue { speaker: "Yumi".to_string(), content: "Yumi: *with a warm smile* Thank you! I appreciate your kind words. Your artwork is equally striking. It's a pleasure to meet a fellow visual novel enthusiast.".to_string() }, Dialogue { speaker: "Akira".to_string(), content: "Akira: *blushing slightly* The pleasure is mine. I've admired your work from afar. We share the same passion, don't we?".to_string() }, Dialogue { speaker: "Yumi".to_string(), content: "Yumi: *laughs softly* Absolutely! Maybe we can exchange ideas and collaborate sometime. It's always great to connect with like-minded creators.".to_string() }, Dialogue { speaker: "".to_string(), content: "Akira and Yumi engage in a heartfelt conversation about their shared love for visual novels and the beauty of storytelling. They quickly realize the immense potential in working together.".to_string() }] }, Scene { title: "Bound by Creativity".to_string(), location: Location { description: "Akira and Yumi's shared studio".to_string(), landmarks: "Art supplies, computer workstations, shelves filled with references, mood boards".to_string(), mood: "Filled with artistic inspiration and anticipation".to_string(), time_of_day: "Morning".to_string() }, script: vec![Dialogue { speaker: "Akira".to_string(), content: "Akira: *holding a sketchbook* I've been working on the character designs for our next visual novel. What do you think?".to_string() }, Dialogue { speaker: "Yumi".to_string(), content: "Yumi: *excitedly* Wow, these are incredible! They perfectly capture the essence and emotions of the characters. I love how they resonate with the narrative we've crafted.".to_string() }, Dialogue { speaker: "Akira".to_string(), content: "Akira: *grateful* Your feedback means a lot. I admire your coding skills too. Your interactive features bring our visual novels to life. Together, we can create something truly magical.".to_string() }, Dialogue { speaker: "Yumi".to_string(), content: "Yumi: *beaming* Absolutely! Let's push the boundaries and create a game that immerses players in a world they won't want to leave. Our collaboration is going to be legendary!".to_string() }, Dialogue { speaker: "".to_string(), content: "Akira and Yumi dive headfirst into their creative process, merging their talents and ideas into a project that has the potential to revolutionize the visual novel industry.".to_string() }] }, Scene { title: "Love and Innovation".to_string(), location: Location { description: "A luxurious conference room".to_string(), landmarks: "Floor-to-ceiling windows with a stunning cityscape, conference table with laptops and tablets, inspirational artwork adorning the walls".to_string(), mood: "Eager anticipation mixed with a sense of nervousness".to_string(), time_of_day: "Afternoon".to_string() }, script: vec![Dialogue { speaker: "Akira".to_string(), content: "Akira: *taking a deep breath* Today is the day we pitch our visual novel to potential publishers. Our dream is within reach.".to_string() }, Dialogue { speaker: "Yumi".to_string(), content: "Yumi: *nodding in agreement* We've poured our hearts and souls into this project. I believe in us. We can do this, together.".to_string() }, Dialogue { speaker: "".to_string(), content: "Akira and Yumi enter the conference room, their eyes shining with determination. They present their innovative vision for a visual novel that merges technology, storytelling, and artistry, leaving the room in awe.".to_string() }, Dialogue { speaker: "Publisher".to_string(), content: "Publisher: *excited* This is unlike anything we've seen before! Your collaboration is a breath of fresh air. We're eager to work with you and bring your vision to a global audience.".to_string() }] }, Scene { title: "A Journey Begins".to_string(), location: Location { description: "Akira and Yumi's new game development studio".to_string(), landmarks: "Inspiring artwork on the walls, comfortable workstations, a wall filled with awards and accolades".to_string(), mood: "A mix of contentment and determination".to_string(), time_of_day: "Morning".to_string() }, script: vec![Dialogue { speaker: "Akira".to_string(), content: "Akira: *looking around in awe* This is it, our studio is finally complete. It's a dream come true.".to_string() }, Dialogue { speaker: "Yumi".to_string(), content: "Yumi: *hugs Akira* We did it! Our love for each other and our craft has brought us to this moment. Let's continue creating mesmerizing visual novels that touch the hearts of players.".to_string() }, Dialogue { speaker: "Akira".to_string(), content: "Akira: *smiling* Together, we'll create stories that will be remembered for a lifetime. Our love will be the foundation of our games, connecting with players on a deep emotional level.".to_string() }, Dialogue { speaker: "".to_string(), content: "Akira and Yumi take their seats, ready to embark on a new chapter of their lives. Their shared love and boundless creativity guide their hands, as they transform dreams into captivating visual novels.".to_string() }] }];
-    let characters = vec![Character { name: "Akira".to_string(), personality: "Akira is a gentle and introverted individual. He is a deep thinker, empathetic, and introspective. He is often lost in his own world of imagination and emotions. Akira is patient, kind-hearted, and has a calm demeanor. He is deeply passionate about his craft and strives to create visual novels that touch the hearts of players.".to_string(), clothing: "Akira prefers comfortable and simple attire that allows him to focus on his work. He often wears a plain white t-shirt, paired with jeans and sneakers. Occasionally, he adorns a black leather jacket to add a touch of style.".to_string(), appearance: "Akira is a 27-year-old Asian male with a slender frame. He has piercing dark eyes that hold a hint of melancholy and long, messy black hair that falls partially over his forehead. Akira's skin is fair and his complexion is soft, making him appear gentle and approachable.".to_string() }, Character { name: "Yumi".to_string(), personality: "Yumi is a cheerful and bubbly individual. She is outgoing, energetic, and always wears a bright smile. Yumi has a playful and optimistic nature that spreads joy to those around her. She is highly creative, innovative, and possesses a keen eye for aesthetics. Yumi takes pride in her work and enjoys creating visual novels that bring happiness and excitement to players.".to_string(), clothing: "Yumi's wardrobe is as vibrant as her personality. She often wears colorful dresses or skirts adorned with cute patterns and accessories. Yumi pairs her outfits with fun and stylish sneakers or sandals. Her accessories include cute hairpins and colorful bracelets.".to_string(), appearance: "Yumi is a 25-year-old mixed-race female with a medium build. She has sparkling brown eyes that radiate warmth and curiosity. Yumi's hair is short and styled in playful waves, dyed in various shades of purple and blue. Her skin has a warm caramel tone, adding to her unique and vibrant appearance.".to_string() }];
+    let novelai_client = vina_sd::api::ApiClient::new(novelai_url);
+
+    println!("Generating game...");
+    let game = generate_story(&openai_token).unwrap();
+    println!("{:?}", game);
+
+    for character in game.characters {
+        let character_description = generate_character_prompt(&openai_token, &character).unwrap();
+        // println!("{character_description}");
+        generate_character_art(&novelai_client, &character, &character_description);
+    }
+
+    /*
 
     match generate_proj(
         ren_path,
@@ -35,4 +46,5 @@ fn main() {
             return;
         },
     }
+    */
 }
