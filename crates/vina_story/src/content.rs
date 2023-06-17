@@ -51,7 +51,7 @@ pub struct Dialogue {
     /// Name of character that is speaking
     pub character: Option<String>,
     /// Actual text content of the dialogue line
-    pub dialogue: String,
+    pub content: String,
     /// Description of which character sprite to use
     pub mood: String,
 }
