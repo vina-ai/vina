@@ -7,7 +7,8 @@ use std::{time::Duration, str::Split};
 use reqwest::{blocking, header::AUTHORIZATION};
 use serde_json::{json, Value};
 use image_base64::from_base64;
-use image::GenericImageView;
+use image::{ImageFormat, DynamicImage};
+use base64::{Engine as _, alphabet, engine::{self, general_purpose}};
 
 pub struct ApiClient {
     api_url: String,
@@ -51,12 +52,18 @@ impl ApiClient {
             .expect("Expected image array");
 
         for i in images.iter_mut() {
-
             let split_i: Vec<&str> = i.as_str().unwrap().split(",").collect();
             let base64 = split_i.get(0).unwrap().to_string();
-            let image = image_base64::from_base64(base64).clone();
-            let buffer = image.as_slice();
-            image::save_buffer("output.png", buffer, 512, 512, image::ColorType::Rgb8).unwrap();
+            let bytes = general_purpose::STANDARD.decode(base64).unwrap();
+            match image::load_from_memory_with_format(&bytes, ImageFormat::Png) {
+                Ok(_dynamic_image) => {
+                    println!("PNG image is successfully decoded");
+                    std::fs::write("output.png", bytes).unwrap();
+                }
+                Err(_) => {
+                    println!("Incorrect format of the image");
+                }
+            }
         }
 
         Ok(())
