@@ -2,15 +2,15 @@
 //!x
 //!
 
-use std::{str::Split, time::Duration};
+use std::{path::Path, str::Split, time::Duration};
 
+use anyhow::anyhow;
 use base64::{
     alphabet,
     engine::{self, general_purpose},
     Engine as _,
 };
 use image::{DynamicImage, ImageFormat};
-use image_base64::from_base64;
 use reqwest::{blocking, header::AUTHORIZATION};
 use serde_json::{json, Value};
 
@@ -18,6 +18,8 @@ pub struct ApiClient {
     api_url: String,
     client: reqwest::blocking::Client,
 }
+
+pub const NEGATIVE_PROMPT: &'static str =  "nsfw, distorted eyes, cropped hair, off center, left, right, ugly, distorted, scary, watermarks, caption, crop, aspect ratio distortion, blurry, harsh lines, black lines, smudged, duplicate, morbid, mutilated, out of frame, off center, extra fingers, mutilated hands, poorly drawn hands, mutation, deformed, bad anatomy, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, mutated hands, fused fingers, too many fingers, long neck, 2 heads, 2 faces, V deformed arm, toy, different eyes, extra ears, double copying of elements face, grain, duplicate, multi, copy";
 
 impl ApiClient {
     pub fn new(api_url: String) -> Self {
@@ -28,11 +30,11 @@ impl ApiClient {
         Self { api_url, client }
     }
 
-    fn request(&self) -> anyhow::Result<()> {
+    pub fn request(&self, prompt: &str, output: &Path) -> anyhow::Result<()> {
         let body: Value = json!({
-            "hr_negative_prompt": "nsfw, distorted eyes, cropped hair, off center, left, right, ugly, distorted, scary, watermarks, caption, crop, aspect ratio distortion, blurry, harsh lines, black lines, smudged, duplicate, morbid, mutilated, out of frame, off center, extra fingers, mutilated hands, poorly drawn hands, mutation, deformed, bad anatomy, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, mutated hands, fused fingers, too many fingers, long neck, 2 heads, 2 faces, V deformed arm, toy, different eyes, extra ears, double copying of elements face, grain, duplicate, multi, copy",
+            "prompt": prompt,
+            "negative_prompt": NEGATIVE_PROMPT,
             "seed": -1,
-            "prompt": "1girl, bishoujo, casual, indoors, standing, 25 years old, fair skin, emerald-green eyes, wavy chestnut hair, cascading curls, vibrant and eclectic clothing, colorful dresses with delicate lace and intricate patterns, whimsical hats, mismatched socks, creative spirit, full body portrait, no background, anime art style.",
             "steps": 28,
             "width": 512,
             "height": 512,
@@ -40,12 +42,18 @@ impl ApiClient {
             "cfg_scale": 12
         });
 
-        let mut res: Value = self
+        let response = self
             .client
-            .post(self.api_url.clone())
+            .post(format!("{}/sdapi/v1/txt2img", self.api_url))
             .json(&body)
-            .send()?
-            .json()?;
+            .send()?;
+
+        if !response.status().is_success() {
+            let err_msg = response.text()?;
+            return Err(anyhow!("{}", err_msg));
+        }
+
+        let mut res: Value = response.json()?;
 
         // Extract the response images
         let images = res["images"].as_array_mut().expect("Expected image array");
@@ -56,8 +64,7 @@ impl ApiClient {
             let bytes = general_purpose::STANDARD.decode(base64).unwrap();
             match image::load_from_memory_with_format(&bytes, ImageFormat::Png) {
                 Ok(_dynamic_image) => {
-                    println!("PNG image is successfully decoded");
-                    std::fs::write("output.png", bytes).unwrap();
+                    std::fs::write(output, bytes).unwrap();
                 },
                 Err(_) => {
                     println!("Incorrect format of the image");
@@ -65,11 +72,6 @@ impl ApiClient {
             }
         }
 
-        Ok(())
-    }
-
-    pub fn test(&self) -> anyhow::Result<()> {
-        self.request().unwrap();
         Ok(())
     }
 }
