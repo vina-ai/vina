@@ -1,3 +1,4 @@
+
 use anyhow::Result;
 use dircpy::*;
 pub fn generate_proj(
@@ -10,3 +11,4 @@ pub fn generate_proj(
     copy_dir("./template/template", output_dir + project_name)?;
     Ok(())
 }
+
