@@ -10,12 +10,14 @@ repository = "https://github.com/PrideHacks2023/vina"
 [workspace]
 members = [
     "crates/vina_codegen",
-    "crates/vina_story"
+    "crates/vina_story",
+    "crates/vina_sd",
 ]
 
 [features]
 
 [dependencies]
+dotenv = "0.15.0"
 dotenvy = "0.15.7"
 vina_codegen = {path = "crates/vina_codegen"}
 

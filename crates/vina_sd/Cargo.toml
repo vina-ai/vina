@@ -1,0 +1,26 @@
+[package]
+name = "vina_sd"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["Anjing Li"]
+description = "generate stable diffusion character and background images"
+repository = "https://github.com/PrideHacks2023/vina"
+
+[features]
+
+[dependencies]
+reqwest = { version = "0.11", features = ["json", "blocking"] }
+tokio = { version = "1", features = ["full"] }
+
+serde_json = "1"
+image-base64 = "0.1.0"
+image = "0.24.6"
+
+log = "0.4"
+env_logger = "0.10"
+
+thiserror = "1"
+anyhow = "1"
+
+dotenv = "0.15.0"
