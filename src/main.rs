@@ -1,8 +1,8 @@
 use clap::Parser;
 use dotenvy::dotenv;
 use vina_codegen::generate_proj;
-use vina_sd::generate_character_art;
-use vina_story::{content::*, generate_character_prompt, generate_story};
+use vina_sd::{generate_character_art, generate_location_art};
+use vina_story::{content::*, generate_character_prompt, generate_location_prompt, generate_story};
 
 #[derive(Parser)]
 struct Cli {
@@ -24,10 +24,17 @@ fn main() {
     let game = generate_story(&openai_token).unwrap();
     println!("{:?}", game);
 
+    /*
     for character in game.characters {
         let character_description = generate_character_prompt(&openai_token, &character).unwrap();
         // println!("{character_description}");
         generate_character_art(&novelai_client, &character, &character_description);
+    }
+    */
+    for scene in game.scenes {
+        let location_description =
+            generate_location_prompt(&openai_token, &scene.location).unwrap();
+        generate_location_art(&novelai_client, &scene.location, &location_description);
     }
 
     /*

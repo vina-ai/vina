@@ -180,6 +180,10 @@ pub fn get_scenes_fn() -> Value {
                                 "type": "object",
                                 "description:": "Description of the physical location the scene takes place in",
                                 "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Name of the location",
+                                    },
                                     "description": {
                                         "type": "string",
                                         "description": "Description of the physical location and objects in the scene",

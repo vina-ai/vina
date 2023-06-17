@@ -43,6 +43,8 @@ pub struct Scene {
 
 #[derive(Deserialize, Debug)]
 pub struct Location {
+    /// Name of the location
+    pub name: String,
     /// Physical description of the location the scene takes place in
     pub description: String,
     /// Concrete objects and landmarks in the scene

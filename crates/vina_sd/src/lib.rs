@@ -15,7 +15,7 @@ use base64::{
 };
 use image::{io::Reader as ImageReader, ImageOutputFormat};
 use serde_json::{json, Value};
-use vina_story::content::Character;
+use vina_story::content::{Character, Location};
 
 use crate::api::{write_to_file, ApiClient, NEGATIVE_PROMPT};
 
@@ -66,4 +66,21 @@ pub fn generate_character_art(client: &ApiClient, character: &Character, prompt:
     let base_rembg = client.request(body, "sdapi/v1/img2img").unwrap();
     let path = PathBuf::from(format!("{}.png", character.name));
     write_to_file(base_rembg, &path).unwrap();
+}
+
+pub fn generate_location_art(client: &ApiClient, location: &Location, prompt: &str) {
+    println!("Generating location art...");
+    let body: Value = json!({
+        "prompt": prompt,
+        "negative_prompt": NEGATIVE_PROMPT,
+        "seed": -1,
+        "steps": 30,
+        "width": 1024,
+        "height": 512,
+        "sampler_index": "Euler",
+        "cfg_scale": 7.5
+    });
+    let base = client.request(body, "sdapi/v1/txt2img").unwrap();
+    let path = PathBuf::from(format!("{}.png", location.name));
+    write_to_file(base, &path).unwrap();
 }

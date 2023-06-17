@@ -3,6 +3,8 @@
 pub mod api;
 pub mod content;
 
+use content::Location;
+
 use crate::{
     api::*,
     content::{Character, Game, Scene},
@@ -28,7 +30,7 @@ pub fn generate_story(token: &str) -> anyhow::Result<Game> {
     let characters: Vec<Character> = parse_fncall(&res).unwrap();
     // println!("CHARACTERS {:?}", characters);
 
-    let res = story_client.run_prompt("Separate the story into multiple scenes, and for each scene give me a long and detailed description of the setting of the scene, include the physical location it takes place in, objects and landmarks in the scene, mood, and time of day. Also create a title each scene that corresponds to the contents of the scene. Furthermore, for each scene, write me a script and return the result in a list with each element as a character's dialogue.", Some(get_scenes_fn())).unwrap();
+    let res = story_client.run_prompt("Separate the story into multiple scenes, and for each scene give me a long and detailed description of the setting of the scene, include the name of the location, physical location it takes place in, objects and landmarks in the scene, mood, and time of day. Also create a title each scene that corresponds to the contents of the scene. Furthermore, for each scene, write me a script and return the result in a list with each element as a character's dialogue.", Some(get_scenes_fn())).unwrap();
 
     let scenes: Vec<Scene> = parse_fncall(&res).unwrap();
     // println!("SCENES {:?}", scenes);
@@ -43,8 +45,24 @@ pub fn generate_story(token: &str) -> anyhow::Result<Game> {
 }
 
 pub fn generate_character_prompt(token: &str, character: &Character) -> anyhow::Result<String> {
-    // Client to generate stable diffusion prompts for the assets
-    let mut sd_prompt_client = ApiClient::new(token);
+    generate_prompt(
+        token,
+        &format!("{}. {}", character.appearance, character.clothing),
+    )
+}
+
+pub fn generate_location_prompt(token: &str, location: &Location) -> anyhow::Result<String> {
+    generate_prompt(
+        token,
+        &format!(
+            "{}. {}. {}. {}",
+            location.description, location.landmarks, location.mood, location.time_of_day
+        ),
+    )
+}
+
+fn generate_prompt(token: &str, prompt: &str) -> anyhow::Result<String> {
+    let mut client = ApiClient::new(token);
 
     let role = r#"
         Today you are going to be an AI Artist. By that, I mean you gonna need to follow a ART PROMPT structure to make art. You are going to take my art requests.
@@ -66,14 +84,9 @@ pub fn generate_character_prompt(token: &str, character: &Character) -> anyhow::
 If the art request asks for a background, include the scenery/subject and then details, and finally the art style (realistic anime) inside the prompt. If the art request asks for a character, include the subject's age, gender, half body portrait, clothing, appearance, additional details, and then anime type art style.
 
     "#;
-    sd_prompt_client.with_role(role);
+    client.with_role(role);
 
-    let res = sd_prompt_client
-        .run_prompt(
-            &format!("{}. {}", character.appearance, character.clothing),
-            None,
-        )
-        .unwrap();
+    let res = client.run_prompt(prompt, None).unwrap();
     // let res = sd_prompt_client.run_prompt("Lily is a 25-year-old woman with fair, porcelain skin and sparkling emerald-green eyes that dance with mischief. Her wavy chestnut hair falls in cascades around her shoulders, framing her face with soft curls. Lily loves to dress in vibrant and eclectic clothing that reflects her creative spirit. She often adorns herself with colorful dresses, adorned with delicate lace and intricate patterns. She accessorizes with whimsical hats and mismatched socks, adding a touch of whimsy to her appearance.", None).unwrap();
     let content = parse_content(res).unwrap();
 
