@@ -8,6 +8,7 @@ pub struct Settings {
     // art style
 }
 
+#[derive(Deserialize, Debug)]
 pub struct Game {
     /// Title of the game
     pub name: String,
@@ -15,6 +16,8 @@ pub struct Game {
     pub synopsis: String,
     /// Characters that are present in the story
     pub characters: Vec<Character>,
+    /// Scenes in the game
+    pub scenes: Vec<Scene>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -27,11 +30,6 @@ pub struct Character {
     pub clothing: String,
     /// Description of the character's physical appearence.
     pub appearance: String,
-}
-
-/// Description of major plot points
-pub struct Plot {
-    pub scenes: Vec<Scene>,
 }
 
 #[derive(Deserialize, Debug)]

@@ -12,11 +12,16 @@ use base64::{
 use image::{io::Reader as ImageReader, ImageOutputFormat};
 use serde_json::{json, Value};
 use vina_sd::api::{write_to_file, ApiClient, NEGATIVE_PROMPT};
+use vina_story::content::Character;
 
 fn main() {
     let api_url = std::env::var("NOVELAI_URL").expect("Could not get NOVELAI_URL");
     let client = ApiClient::new(api_url);
 
+    // generate_character(&client);
+}
+
+pub fn generate_character(client: &ApiClient, character: &Character) {
     println!("Generating base character...");
     let body: Value = json!({
         "prompt": "1girl, bishoujo, casual, indoors, standing, 25 years old, fair skin, emerald-green eyes, wavy chestnut hair, cascading curls, vibrant and eclectic clothing, colorful dresses with delicate lace and intricate patterns, whimsical hats, mismatched socks, creative spirit, full body portrait, no background, anime art style.",

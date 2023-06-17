@@ -99,7 +99,8 @@ impl ApiClient {
     }
 }
 
-pub fn parse_message<T: DeserializeOwned>(msg: &Value) -> anyhow::Result<T> {
+/// Parse a function call
+pub fn parse_fncall<T: DeserializeOwned>(msg: &Value) -> anyhow::Result<T> {
     let fn_call = &msg["function_call"];
     let fn_name = fn_call["name"].as_str().unwrap();
 
@@ -111,6 +112,12 @@ pub fn parse_message<T: DeserializeOwned>(msg: &Value) -> anyhow::Result<T> {
     let downcasted = serde_json::from_value(fn_args)?;
 
     Ok(downcasted)
+}
+
+/// Parse text content
+pub fn parse_content(msg: &Value) -> anyhow::Result<String> {
+    let content = msg["content"].as_str().unwrap().to_string();
+    Ok(content)
 }
 
 pub fn get_characters_fn() -> Value {
