@@ -2,13 +2,17 @@
 //!x
 //!
 
-use std::{time::Duration, str::Split};
+use std::{str::Split, time::Duration};
 
+use base64::{
+    alphabet,
+    engine::{self, general_purpose},
+    Engine as _,
+};
+use image::{DynamicImage, ImageFormat};
+use image_base64::from_base64;
 use reqwest::{blocking, header::AUTHORIZATION};
 use serde_json::{json, Value};
-use image_base64::from_base64;
-use image::{ImageFormat, DynamicImage};
-use base64::{Engine as _, alphabet, engine::{self, general_purpose}};
 
 pub struct ApiClient {
     api_url: String,
@@ -21,10 +25,7 @@ impl ApiClient {
             .timeout(Duration::from_secs(120))
             .build()
             .unwrap();
-        Self {
-            api_url,
-            client,
-        }
+        Self { api_url, client }
     }
 
     fn request(&self) -> anyhow::Result<()> {
@@ -47,9 +48,7 @@ impl ApiClient {
             .json()?;
 
         // Extract the response images
-        let images = res["images"]
-            .as_array_mut()
-            .expect("Expected image array");
+        let images = res["images"].as_array_mut().expect("Expected image array");
 
         for i in images.iter_mut() {
             let split_i: Vec<&str> = i.as_str().unwrap().split(",").collect();
@@ -59,10 +58,10 @@ impl ApiClient {
                 Ok(_dynamic_image) => {
                     println!("PNG image is successfully decoded");
                     std::fs::write("output.png", bytes).unwrap();
-                }
+                },
                 Err(_) => {
                     println!("Incorrect format of the image");
-                }
+                },
             }
         }
 
@@ -73,5 +72,4 @@ impl ApiClient {
         self.request().unwrap();
         Ok(())
     }
-
 }

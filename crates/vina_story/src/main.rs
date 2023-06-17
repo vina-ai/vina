@@ -6,8 +6,8 @@ use vina_story::{
 fn main() {
     let token = std::env::var("OPENAI_KEY").expect("Could not get OPENAI_KEY");
 
-    // story(&token);
-    sd(&token);
+    story(&token);
+    // sd(&token);
 }
 
 fn story(token: &str) -> anyhow::Result<()> {
@@ -21,16 +21,16 @@ fn story(token: &str) -> anyhow::Result<()> {
         )
         .unwrap();
 
-    // story_client
-    //     .run_prompt("Generate a title for this story", None)
-    //     .unwrap();
+    story_client
+        .run_prompt("Generate a title for this story", None)
+        .unwrap();
 
-    // let res = story_client.run_prompt("Give me each of the characters in the story, along with detailed personality, clothing, and physical appearance details (include age, race, gender).", Some(get_characters_fn())).unwrap();
+    let res = story_client.run_prompt("Give me each of the characters in the story, along with detailed personality, clothing, and physical appearance details (include age, race, gender).", Some(get_characters_fn())).unwrap();
 
-    // let characters: Vec<Character> = parse_message(&res).unwrap();
-    // println!("CHARACTERS {:?}", characters);
+    let characters: Vec<Character> = parse_message(&res).unwrap();
+    println!("CHARACTERS {:?}", characters);
 
-    let res = story_client.run_prompt("Separate the story into multiple scenes, and for each scene give me a long and detailed description of the setting of the scene, include the physical location it takes place in, objects and landmarks in the scene, mood, and time of day. Also create a title that corresponds to the contents of the scene. Furthermore, for each scene, write me a script and return the result in a list with each element as a character's dialogue.", Some(get_scenes_fn())).unwrap();
+    let res = story_client.run_prompt("Separate the story into multiple scenes, and for each scene give me a long and detailed description of the setting of the scene, include the physical location it takes place in, objects and landmarks in the scene, mood, and time of day. Also create a title each scene that corresponds to the contents of the scene. Furthermore, for each scene, write me a script and return the result in a list with each element as a character's dialogue.", Some(get_scenes_fn())).unwrap();
 
     let scenes: Vec<Scene> = parse_message(&res).unwrap();
     println!("SCENES {:?}", scenes);

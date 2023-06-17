@@ -1,5 +1,5 @@
-use vina_sd::api::ApiClient;
 use dotenv::dotenv;
+use vina_sd::api::ApiClient;
 
 fn main() {
     dotenv().ok();
