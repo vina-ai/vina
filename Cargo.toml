@@ -16,3 +16,6 @@ members = [
 [features]
 
 [dependencies]
+dotenvy = "0.15.7"
+vina_codegen = {path = "crates/vina_codegen"}
+
