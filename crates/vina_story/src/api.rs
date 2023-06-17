@@ -29,11 +29,22 @@ impl ApiClient {
         }
     }
 
-    fn request(&self, messages: &mut Vec<Value>) -> anyhow::Result<()> {
-        let body: serde_json::Value = json!({
-            "model": self.model,
-            "messages": messages,
-        });
+    fn request(&self, messages: &mut Vec<Value>, function: Option<Value>) -> anyhow::Result<()> {
+        // TODO this is current a pretty dumb solution (api doesnt work when passing in functions
+        // as empty vec)
+        let body: Value = if let Some(function) = function {
+            json!({
+                "model": self.model,
+                "messages": messages,
+                "functions": vec![function]
+            })
+        } else {
+            json!({
+                "model": self.model,
+                "messages": messages,
+            })
+        };
+
         let mut res: Value = self
             .client
             .post(API_URL)
@@ -52,7 +63,6 @@ impl ApiClient {
         // TODO currently not sure why choices is an array
         for choice in choices.iter_mut() {
             let res_msg = choice["message"].take();
-            println!("RESP {}", serde_json::to_string_pretty(&res_msg)?);
             messages.push(res_msg);
         }
 
@@ -72,13 +82,20 @@ impl ApiClient {
             "role": "user", "content": "Write a love story about two visual novel developers."
         }));
 
-        self.request(&mut messages).unwrap();
+        self.request(&mut messages, None).unwrap();
 
         messages.push(json!({
             "role": "user", "content": "Generate a title for this story"
         }));
 
-        self.request(&mut messages).unwrap();
+        self.request(&mut messages, None).unwrap();
+
+        messages.push(json!({
+            "role": "user", "content": "Give me each of the characters in the story, along with detailed personality, clothing, and appearance details."
+        }));
+
+        self.request(&mut messages, Some(get_characters_fn()))
+            .unwrap();
 
         /*
         let choices = &res_val["choices"].as_array().unwrap();
@@ -104,13 +121,8 @@ impl ApiClient {
     }
 }
 
-fn get_current_weather(param: &Value) {
-    let location = param["location"].as_str().unwrap();
-    println!("getting the current weather in {location}...");
-}
-
-lazy_static! {
-    pub static ref GET_CHARACTERS_FN: Value = json!({
+fn get_characters_fn() -> Value {
+    json!({
         "name": "get_characters",
         "description": "Get detailed information about each character in the story",
         "parameters": {
@@ -145,8 +157,11 @@ lazy_static! {
             },
             "required": ["characters"],
         }
-    });
-    pub static ref GET_SCENES_FN: Value = json!({
+    })
+}
+
+fn get_scenes_fn() -> Value {
+    json!({
         "name": "get_scenes",
         "description": "Extract detailed information about scenes in the story",
         "parameters": {
@@ -188,5 +203,5 @@ lazy_static! {
             },
             "required": ["scenes"],
         }
-    });
+    })
 }
