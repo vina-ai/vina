@@ -1,16 +1,21 @@
-use std::{fs::OpenOptions, io::Write, time::SystemTime};
+use std::{fs::OpenOptions, io::Write, path::PathBuf, time::SystemTime};
 
 use anyhow::Result;
 use dircpy::*;
 pub fn generate_proj(
     ren_path: String,
-    output_dir: String,
-    project_name: &str,
-    images: Vec<String>,
+    project_name: String,
+
     description: String,
+
+    output_dir: std::path::PathBuf,
+
+    data: Vec<String>,
 ) -> Result<()> {
     println!("{}", ren_path);
-    let project_path = output_dir + project_name;
+    let mut project_path = output_dir.clone();
+    project_path.set_file_name(project_name.clone());
+
     let d = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .expect("Duration since UNIX_EPOCH failed");
@@ -18,22 +23,20 @@ pub fn generate_proj(
     copy_dir("./template/template", project_path.clone())?;
     let mut file = OpenOptions::new()
         .append(true)
-        .open(project_path + "/game/options.rpy")?;
+        .open(project_path.join("/game/options.rpy"))?;
     writeln!(
         file,
         "define config.save_directory = \"{}-{}\"",
         "template",
         d.as_secs()
     )?;
-    writeln!(file, "define config.name = _(\"{}\")", project_name)?;
-    writeln!(file, "define build.name = _(\"{}\")", project_name)?;
+    writeln!(file, "define config.name = _(\"{}\")", project_name.clone())?;
+    writeln!(file, "define build.name = _(\"{}\")", project_name.clone())?;
 
     writeln!(file, "define gui.about = _p(\"\"\"{}\"\"\")", description)?;
 
+    write_script(project_path, data);
+
     Ok(())
 }
-// define config.save_directory = "template-1686969152"
-// define config.name = _("template")
-// define gui.about = _p("""
-// """)
-// define build.name = "template"
+pub fn write_script(project_path: PathBuf, data: Vec<String>) {}
