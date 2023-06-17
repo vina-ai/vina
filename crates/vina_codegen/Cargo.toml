@@ -12,3 +12,5 @@ repository = "https://github.com/PrideHacks2023/vina"
 [dependencies]
 anyhow = "1.0.71"
 dircpy = "0.3.14"
+vina_story = {path = "../vina_story"}
+
