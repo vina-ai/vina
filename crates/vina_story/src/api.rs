@@ -22,13 +22,13 @@ pub struct ApiClient {
 }
 
 impl ApiClient {
-    pub fn new(api_key: String) -> Self {
+    pub fn new<S: Into<String>>(api_key: S) -> Self {
         let client = reqwest::blocking::Client::builder()
             .timeout(Duration::from_secs(120))
             .build()
             .unwrap();
         Self {
-            api_key,
+            api_key: api_key.into(),
             model: String::from("gpt-3.5-turbo-0613"),
             client,
             messages: Vec::new(),
@@ -89,6 +89,13 @@ impl ApiClient {
         self.messages.push(res_msg);
 
         Ok(self.messages.last().unwrap())
+    }
+
+    /// Specify a description of the role you wish openapi to take on
+    pub fn with_role(&mut self, role: &str) {
+        self.messages.push(json!({
+            "role": "system", "content": role,
+        }));
     }
 }
 
@@ -153,36 +160,58 @@ pub fn get_scenes_fn() -> Value {
             "type": "object",
             "properties": {
                 "inner": {
-                    "type": "object",
+                    "type": "array",
                     "description": "List of scenes in the story",
-                    "properties": {
-                        "title": {
-                            "type": "string",
-                            "description:": "Descriptive title of the scene based on it's contents",
-                        },
-                        "setting": {
-                            "type": "string",
-                            "description:": "Description of the physical location the scene takes place in",
-                        },
-                        "script": {
-                            "type": "array",
-                            "items": {
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "description:": "Descriptive title of the scene based on it's contents",
+                            },
+                            "location": {
                                 "type": "object",
-                                "description": "A line in the script, contains information like the speaker and also what is being said",
+                                "description:": "Description of the physical location the scene takes place in",
                                 "properties": {
-                                    "speaker": {
+                                    "description": {
                                         "type": "string",
-                                        "description": "Name of the speaker"
+                                        "description": "Description of the physical location and objects in the scene",
                                     },
-                                    "content": {
+                                    "landmarks": {
                                         "type": "string",
-                                        "description": "What the speaker actually says"
+                                        "description": "Landmarks and objects of focus that are present in the scene",
+                                    },
+                                    "mood": {
+                                        "type": "string",
+                                        "description": "Information about the mood",
+                                    },
+                                    "time_of_day": {
+                                        "type": "string",
+                                        "description": "What time of day it is",
+                                    },
+                                }
+                            },
+                            "script": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "description": "A line in the script, contains information like the speaker and also what is being said",
+                                    "properties": {
+                                        "speaker": {
+                                            "type": "string",
+                                            "description": "Name of the speaker"
+                                        },
+                                        "content": {
+                                            "type": "string",
+                                            "description": "What the speaker actually says"
+                                        }
                                     }
                                 }
-                            }
 
-                        },
+                            },
+                        }
                     }
+
                 },
 
             },

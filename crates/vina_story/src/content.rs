@@ -34,27 +34,33 @@ pub struct Plot {
     pub scenes: Vec<Scene>,
 }
 
+#[derive(Deserialize, Debug)]
 pub struct Scene {
     /// Name of the scene
     pub title: String,
     /// Description of the physical location the scene takes place in
-    pub setting: String,
-    pub script: Script,
-    /// Description of the modd of the scene, taken into account when generating the background
-    /// location as well as music
+    pub location: Location,
+    pub script: Vec<Dialogue>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Location {
+    /// Physical description of the location the scene takes place in
+    pub description: String,
+    /// Concrete objects and landmarks in the scene
+    pub landmarks: String,
+    /// Information on the mood and time of day
     pub mood: String,
+    /// Time of day
+    pub time_of_day: String,
 }
 
-pub struct Script {
-    /// Lines of dialogue that are present in the story
-    pub dialogues: Vec<Dialogue>,
-}
-
+#[derive(Deserialize, Debug)]
 pub struct Dialogue {
     /// Name of character that is speaking
-    pub character: Option<String>,
+    pub speaker: String,
     /// Actual text content of the dialogue line
     pub content: String,
-    /// Description of which character sprite to use
-    pub mood: String,
+    // /// Description of which character sprite to use
+    // pub mood: String,
 }
