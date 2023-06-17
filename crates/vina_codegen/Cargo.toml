@@ -1,0 +1,12 @@
+[package]
+name = "vina_codegen"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["Daniel Liu <mr.picklepinosaur@gmail.com>"]
+description = "generate renpy project"
+repository = "https://github.com/PrideHacks2023/vina"
+
+[features]
+
+[dependencies]

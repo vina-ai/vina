@@ -1,0 +1,18 @@
+[package]
+name = "vina"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["Daniel Liu <mr.picklepinosaur@gmail.com>"]
+description = "ai generated visual novel"
+repository = "https://github.com/PrideHacks2023/vina"
+
+[workspace]
+members = [
+    "crates/vina_codegen",
+    "crates/vina_story"
+]
+
+[features]
+
+[dependencies]
