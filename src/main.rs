@@ -21,7 +21,11 @@ fn main() {
     let novelai_client = vina_sd::api::ApiClient::new(novelai_url);
 
     println!("Generating game...");
-    let game = generate_story(&openai_token).unwrap();
+    let game = generate_story(
+        &openai_token,
+        "Write a love story about two visual novel developers.",
+    )
+    .unwrap();
     println!("{:?}", game);
 
     /*

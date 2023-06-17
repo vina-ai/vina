@@ -10,16 +10,11 @@ use crate::{
     content::{Character, Game, Scene},
 };
 
-pub fn generate_story(token: &str) -> anyhow::Result<Game> {
+pub fn generate_story(token: &str, prompt: &str) -> anyhow::Result<Game> {
     // Client to generate details of the story
     let mut story_client = ApiClient::new(token);
 
-    story_client
-        .run_prompt(
-            "Write a love story about two visual novel developers.",
-            None,
-        )
-        .unwrap();
+    story_client.run_prompt(prompt, None).unwrap();
 
     story_client
         .run_prompt("Generate a title for this story", None)
