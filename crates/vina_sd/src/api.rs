@@ -30,21 +30,10 @@ impl ApiClient {
         Self { api_url, client }
     }
 
-    pub fn request(&self, prompt: &str, output: &Path) -> anyhow::Result<()> {
-        let body: Value = json!({
-            "prompt": prompt,
-            "negative_prompt": NEGATIVE_PROMPT,
-            "seed": -1,
-            "steps": 28,
-            "width": 512,
-            "height": 512,
-            "sampler_index": "Euler",
-            "cfg_scale": 12
-        });
-
+    pub fn request(&self, body: Value, url_path: &str) -> anyhow::Result<String> {
         let response = self
             .client
-            .post(format!("{}/sdapi/v1/txt2img", self.api_url))
+            .post(format!("{}/{}", self.api_url, url_path))
             .json(&body)
             .send()?;
 
@@ -58,20 +47,24 @@ impl ApiClient {
         // Extract the response images
         let images = res["images"].as_array_mut().expect("Expected image array");
 
-        for i in images.iter_mut() {
-            let split_i: Vec<&str> = i.as_str().unwrap().split(",").collect();
-            let base64 = split_i.get(0).unwrap().to_string();
-            let bytes = general_purpose::STANDARD.decode(base64).unwrap();
-            match image::load_from_memory_with_format(&bytes, ImageFormat::Png) {
-                Ok(_dynamic_image) => {
-                    std::fs::write(output, bytes).unwrap();
-                },
-                Err(_) => {
-                    println!("Incorrect format of the image");
-                },
-            }
-        }
+        assert!(images.len() == 1);
 
-        Ok(())
+        let image = images.last().unwrap().as_str().unwrap().to_string();
+
+        Ok(image)
     }
+}
+
+pub fn write_to_file(data: String, output: &Path) -> anyhow::Result<()> {
+    let image_data = data.split(",").next().unwrap().to_string();
+    let bytes = general_purpose::STANDARD.decode(image_data).unwrap();
+    match image::load_from_memory_with_format(&bytes, ImageFormat::Png) {
+        Ok(_dynamic_image) => {
+            std::fs::write(output, bytes).unwrap();
+        },
+        Err(_) => {
+            println!("Incorrect format of the image");
+        },
+    };
+    Ok(())
 }
