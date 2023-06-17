@@ -1,5 +1,7 @@
 //! Game content
 
+use serde::{de::DeserializeOwned, Deserialize};
+
 /// Configurable aspects when generating the dialogue
 pub struct Settings {
     // dialogue length (how long and detaile deach scene should be)
@@ -15,6 +17,7 @@ pub struct Game {
     pub characters: Vec<Character>,
 }
 
+#[derive(Deserialize, Debug)]
 pub struct Character {
     pub name: String,
     /// Description of the character's personality. Will be taken into account when generating
@@ -23,7 +26,7 @@ pub struct Character {
     /// Description of the character's clothing choices.
     pub clothing: String,
     /// Description of the character's physical appearence.
-    pub appearence: String,
+    pub appearance: String,
 }
 
 /// Description of major plot points
