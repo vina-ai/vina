@@ -4,7 +4,8 @@ pub mod api;
 pub mod content;
 pub mod music;
 
-use content::Location;
+use content::{Dialogue, Location};
+use serde_json::{json, Value};
 
 use crate::{
     api::*,
@@ -15,10 +16,11 @@ pub fn generate_story(token: &str, prompt: &str) -> anyhow::Result<Game> {
     // Client to generate details of the story
     let mut story_client = ApiClient::new(token);
 
-    story_client.run_prompt(prompt, None).unwrap();
+    let res = story_client.run_prompt(prompt, None).unwrap();
+    let game_name = parse_content(res)?;
 
     story_client
-        .run_prompt("Generate a title for this story", None)
+        .run_prompt("Generate a short game title for this story", None)
         .unwrap();
 
     let res = story_client.run_prompt("Limit the number of characters to a maximum of 3. Give me each of the characters in the story, along with detailed personality, clothing, and physical appearance details (include age, race, gender).", Some(get_characters_fn())).unwrap();
@@ -26,15 +28,32 @@ pub fn generate_story(token: &str, prompt: &str) -> anyhow::Result<Game> {
     let characters: Vec<Character> = parse_fncall(&res).unwrap();
     // println!("CHARACTERS {:?}", characters);
 
-    let res = story_client.run_prompt("Limit the number of locations to a maximum of 5. Separate the story into multiple scenes, and for each scene give me a long and detailed description of the setting of the scene, omit any descriptions of people, include the name of the location, physical location it takes place in, objects and landmarks in the scene, mood, and time of day. Also create a title each scene that corresponds to the contents of the scene. Furthermore, for each scene, write me a script and return the result in a list with each element as a character's dialogue, and use a facial expression from this list: smiling, crying, nervous, excited, blushing to match the dialogue spoken. Also For each scene, tell me the music genre from this list Funky, Calm, Dark, Inspirational, Bright, Dramatic, Happy, Romantic, Angry, Sad", Some(get_scenes_fn())).unwrap();
+    let res = story_client.run_prompt("Separate the story into multiple scenes, and for each scene give me a long and detailed description of the setting of the scene, omit any descriptions of people, include the name of the location, physical location it takes place in, objects and landmarks in the scene, mood, and time of day. Also create a title each scene that corresponds to the contents of the scene. Furthermore, for each scene, write me a script and return the result in a list with each element as a character's dialogue, and use a facial expression from this list: smiling, crying, nervous, excited, blushing to match the dialogue spoken. Also For each scene, tell me the music genre from this list Funky, Calm, Dark, Inspirational, Bright, Dramatic, Happy, Romantic, Angry, Sad", Some(get_scenes_fn())).unwrap();
 
-    let scenes: Vec<Scene> = parse_fncall(&res).unwrap();
+    let raw_scenes: Value = parse_fncall_raw(&res).unwrap();
     // println!("SCENES {:?}", scenes);
+
+    let mut val_scenes: Vec<Value> = vec![];
+    for (i, raw_scene) in raw_scenes.as_array().unwrap().iter().enumerate() {
+        let scene_number = i + 1;
+        let res = story_client.run_prompt(&format!("For scene {scene_number}, write me a script with a lot of speaking. Prioritize number of lines of dialogue. When writing each line of dialogue, take into account the personality and mood of the character as well as the setting. Do not use a narrator. Ensure that the script transitions smoothly into the next scene. Return the result in a list. Also include facial expression from this list: smiling, crying, nervous, excited, blushing to match the dialogue spoken."), Some(get_script_fn())).unwrap();
+
+        let script: Vec<Dialogue> = parse_fncall(&res).unwrap();
+
+        // construct finished scene
+        let mut obj_scene = raw_scene.as_object().unwrap().clone();
+        obj_scene.insert(String::from("script"), json! {script});
+        val_scenes.push(Value::Object(obj_scene));
+    }
+    // println!("BUILT SCENE {val_scenes:?}");
+
+    let scenes: Vec<Scene> = serde_json::from_value(Value::Array(val_scenes)).unwrap();
 
     let game = Game {
         name: String::from("VinaGame"),
         synopsis: String::new(),
         characters,
+        // scenes: vec![],
         scenes,
     };
     Ok(game)
@@ -51,8 +70,8 @@ pub fn generate_location_prompt(token: &str, location: &Location) -> anyhow::Res
     generate_prompt(
         token,
         &format!(
-            "{}. {}. {}. {}",
-            location.description, location.landmarks, location.mood, location.time_of_day
+            "{}. {}. {}",
+            location.description, location.landmarks, location.time_of_day
         ),
     )
 }
