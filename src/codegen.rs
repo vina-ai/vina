@@ -1,3 +1,4 @@
+
 use std::{
     fs::{File, OpenOptions},
     io::{BufWriter, Write},
@@ -48,6 +49,62 @@ pub fn generate_proj(game: &Game, output_dir: &Path) -> Result<()> {
 
     Ok(())
 }
+
+
+    //Character definitions
+    for (i, c) in game.characters.iter().enumerate() {
+        writeln!(file, r#"define {} = Character("{}")"#, c.name, c.name)?;
+        writeln!(file, r#"image {}_img = "{}.png""#, c.name, c.name)?;
+    }
+
+    writeln!(file, "label start:")?;
+    for (i, s) in game.scenes.into_iter().enumerate() {
+        let mut seen: Vec<String> = vec![];
+        let mut indentation = 4;
+
+        writeln!(file, "{}label scene_{}:", " ".repeat(indentation), i)?;
+
+        indentation += 4;
+        writeln!(file, "{}scene bg bg_{}:", " ".repeat(indentation), i)?;
+        indentation += 4;
+
+        writeln!(file, "{}zoom 2", " ".repeat(indentation))?;
+        indentation -= 4;
+
+        for d in s.script {
+            if game
+                .characters
+                .iter()
+                .map(|c| c.name.clone())
+                .collect::<Vec<String>>()
+                .contains(&d.speaker)
+            {
+                if !seen.contains(&d.speaker) {
+                    seen.push(d.speaker.clone());
+                    let position = match seen.len() {
+                        1 => "left",
+                        2 => "right",
+                        _ => "center",
+                    };
+                    writeln!(
+                        file,
+                        "{}show {}_img at {}",
+                        " ".repeat(indentation),
+                        d.speaker,
+                        position
+                    )?;
+                    //display character
+                }
+                writeln!(
+                    file,
+                    r#"{}{} "{}""#,
+                    " ".repeat(indentation),
+                    d.speaker,
+                    d.content.split(": ").last().unwrap_or(d.content.as_str())
+                )?;
+            } else {
+                writeln!(file, r#"{} "{}""#, " ".repeat(indentation), d.content)?;
+            }
 
 pub struct ScriptCtx {
     /// Indentation in number of tabs
@@ -127,6 +184,7 @@ fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Resul
             ))?;
         } else {
             ctx.write(format!(r#""{}""#, d.content))?;
+
         }
     }
     ctx.unindent();
