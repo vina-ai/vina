@@ -112,6 +112,14 @@ pub fn write_script(ctx: &mut ScriptCtx, game: &Game) -> Result<()> {
             ))?;
         }
     }
+    ctx.write("transform midleft:".to_string())?;
+    ctx.indent();
+    ctx.write("xalign 0.1 yalign 0.5".to_string())?;
+    ctx.unindent();
+    ctx.write("transform midright:".to_string())?;
+    ctx.indent();
+    ctx.write("xalign 0.9 yalign 0.5".to_string())?;
+    ctx.unindent();
 
     ctx.write(format!("label start:"))?;
     for (i, scene) in game.scenes.iter().enumerate() {
@@ -132,6 +140,8 @@ fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Resul
     ctx.write(format!("zoom 2"))?;
     ctx.unindent();
 
+    ctx.write("with dissolve".to_string())?;
+
     for d in scene.script.iter() {
         if game
             .characters
@@ -142,18 +152,13 @@ fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Resul
         {
             if !char_pos.contains_key(&d.speaker) {
                 let position = match char_pos.len() {
-                    1 => "left",
-                    2 => "right",
+                    0 => "midleft",
+                    1 => "midright",
                     _ => "center",
                 };
 
                 char_pos.insert(d.speaker.clone(), position.to_string());
             }
-            ctx.write(format!(
-                r#"{} "{}""#,
-                d.speaker,
-                d.content.split(": ").last().unwrap_or(d.content.as_str())
-            ))?;
             let express: String = if EXPRESSIONS.contains(&d.facial_expression.as_str()) {
                 d.facial_expression.clone()
             } else {
@@ -162,6 +167,11 @@ fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Resul
             ctx.write(format!(
                 "show {}_img {} at {}",
                 d.speaker, express, char_pos[&d.speaker]
+            ))?;
+            ctx.write(format!(
+                r#"{} "{}""#,
+                d.speaker,
+                d.content.split(": ").last().unwrap_or(d.content.as_str())
             ))?;
         } else {
             ctx.write(format!(r#""{}""#, d.content))?;

@@ -107,7 +107,7 @@ fn generate_game(args: &Cli, openai_token: &str) -> Game {
         // Otherwise generate game from scratch
 
         println!("Generating game...");
-        let prompt = "Write a love story about two LGBTQ+ individuals falling in love and overcoming stigma and hardships.";
+        let prompt = "Write a love story about two gay individuals falling in love and overcoming stigma and hardships.";
         let game = generate_story(openai_token, prompt).unwrap();
         println!("{:?}", game);
 
@@ -129,6 +129,7 @@ fn generate_game(args: &Cli, openai_token: &str) -> Game {
     }
 }
 pub fn run_game(ren_path: &PathBuf, out: &PathBuf, game: &Game) -> Result<()> {
+    println!("Running Game");
     if cfg!(target_os = "windows") {
     } else {
         Command::new(ren_path.to_str().unwrap())
