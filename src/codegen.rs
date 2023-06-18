@@ -154,7 +154,7 @@ fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Resul
             ))?;
             ctx.write(format!(
                 "show {}_img {} at {}",
-                d.speaker, d.expression, char_pos[&d.speaker]
+                d.speaker, d.facial_expression, char_pos[&d.speaker]
             ))?;
         } else {
             ctx.write(format!(r#""{}""#, d.content))?;
