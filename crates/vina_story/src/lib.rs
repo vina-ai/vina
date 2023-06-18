@@ -66,17 +66,19 @@ fn generate_prompt(token: &str, prompt: &str) -> anyhow::Result<String> {
 
         PROMPT 1:
 
-        Original Character, Volumetric Lighting, Best Shadows, Shallow Depth of Field, Portrait Of Stunningly Beautiful Girl, Petite, Delicate Beautiful Attractive Face With Alluring Black Eyes, Sharp Eyebrows, Respirator Half Face Cover Gas Mask, Expressionless, Lovely Small Breasts, Layered Short Black Hair, Blush Eyeshadow, Thick Eyelashes, Metallic Texture, Full Body Fire Protection Suit, Flamethrower With Fuel, Flamethrower With Fuel Tank, Looking At Other, Destroyed Rusty Metal Structures, Standing In The Burning Destroyed City, Blazing Flames, Burning Black Smoke Rising Sky, Brilliant Colorful Paintings
+        1girl, Emma Watson as a bishoujo, big eyes, centered headshot portrait casual, indoors, standing,  bokeh,  Makoto Shinkai style
 
         PROMPT 2:
 
-        best quality, ultra detailed, 1girl, solo, standing, red hair, long braided hair, golden eyes, bangs, medium breasts, white shirt, necktie, stare, smile, looking at viewer, dark background
+        best quality, ultra detailed, 1girl, Lucy Liu as a bishoujo, solo, standing, red hair, long braided hair, golden eyes, bangs, medium breasts, white shirt, necktie, stare, smile, looking at viewer, dark background
 
         PROMPT 3:
 
-        1girl, solo, masterpiece, high quality, professional full body photo, attractive woman, as hardcore hippy, toned physique, scifi, high quality, detailed_ey Furthermore, the art you generate will be used as characters in a visual novel. es, eyelashes, , Shaved Rainbow hair, slender waist, slender thighs, medium build, toned muscles, perfect face, ideal skin, photorealistic, beautiful clouds, night, cloudy , realistic, sharp focus, 8k high definition, insanely detailed, intricate, elegant
-
-If the art request asks for a background, include the scenery/subject and then details, and finally the art style (realistic anime) inside the prompt. If the art request asks for a character, include the subject's age, gender, half body portrait, clothing, appearance, additional details, and then anime type art style.
+        1girl, Rihanna as a bishoujo, solo, masterpiece, high quality, professional full body photo, attractive woman, as hardcore hippy, toned physique, scifi, high quality, detailed eyes, eyelashes, Shaved Rainbow hair, slender waist, slender thighs, medium build, toned muscles, perfect face, ideal skin, photorealistic, beautiful clouds, night, cloudy , realistic, sharp focus, 8k high definition, insanely detailed, intricate, elegant
+        
+        Furthermore, the art you generate will be used as characters in a visual novel. 
+        If the art request asks for a background, include the scenery/subject and then details, and finally the art style (realistic anime) inside the prompt.
+        If the art request asks for a character, include the words "1person, solo, half body portrait, Makoto Shinkai style", and that the character looks similar to a random celebrity of your choice, the character's age, gender, clothing, appearance, additional details.
 
     "#;
     client.with_role(role);

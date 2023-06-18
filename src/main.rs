@@ -39,10 +39,12 @@ fn main() {
 
     let game = generate_game(&args, &openai_token);
 
+    // Generate art for each character
     for character in game.characters.iter() {
         let character_description = generate_character_prompt(&openai_token, &character).unwrap();
         // println!("{character_description}");
-        generate_character_art(&novelai_client, &character, &character_description);
+        let expressions = vec!["laughing", "crying", "angry"];
+        generate_character_art(&novelai_client, &character, &character_description, expressions);
     }
 
     // Generate art for each scene
@@ -76,8 +78,8 @@ fn generate_game(args: &Cli, openai_token: &str) -> Game {
         // Otherwise generate game from scratch
 
         println!("Generating game...");
-        let prompt = "Write a love story about two visual novel developers.";
-        let game: Game = generate_story(openai_token, prompt).unwrap();
+        let prompt = "Write a love story about two LGBTQ+ individuals falling in love and overcoming stigma and hardships.";
+        let game = generate_story(openai_token, prompt).unwrap();
         println!("{:?}", game);
 
         // Write completed game to file to be reloaded
