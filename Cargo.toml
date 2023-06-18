@@ -16,15 +16,15 @@ members = [
 [features]
 
 [dependencies]
-dotenv = "0.15.0"
 clap = { version = "4.3.4", features = ["derive"] }
-dotenvy = "0.15.7"
-anyhow = "1.0.71"
-dircpy = "0.3.14"
 
+ron = { version = "0.8" }
+
+dotenv = "0.15.0"
+dotenvy = "0.15.7"
+dircpy = "0.3.14"
 
 vina_story = {path = "crates/vina_story"}
 vina_sd = { path = "crates/vina_sd" }
 
-
-
+anyhow = "1.0.71"

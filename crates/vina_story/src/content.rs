@@ -1,6 +1,6 @@
 //! Game content
 
-use serde::{de::DeserializeOwned, Deserialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 /// Configurable aspects when generating the dialogue
 pub struct Settings {
@@ -8,7 +8,7 @@ pub struct Settings {
     // art style
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Game {
     /// Title of the game
     pub name: String,
@@ -20,7 +20,7 @@ pub struct Game {
     pub scenes: Vec<Scene>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Character {
     pub name: String,
     /// Description of the character's personality. Will be taken into account when generating
@@ -32,7 +32,7 @@ pub struct Character {
     pub appearance: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Scene {
     /// Name of the scene
     pub title: String,
@@ -41,7 +41,7 @@ pub struct Scene {
     pub script: Vec<Dialogue>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Location {
     /// Name of the location
     pub name: String,
@@ -55,7 +55,7 @@ pub struct Location {
     pub time_of_day: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Dialogue {
     /// Name of character that is speaking
     pub speaker: String,

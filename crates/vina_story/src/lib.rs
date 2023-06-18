@@ -31,7 +31,7 @@ pub fn generate_story(token: &str, prompt: &str) -> anyhow::Result<Game> {
     // println!("SCENES {:?}", scenes);
 
     let game = Game {
-        name: String::new(),
+        name: String::from("VinaGame"),
         synopsis: String::new(),
         characters,
         scenes,

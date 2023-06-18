@@ -1,30 +1,31 @@
-use std::{collections::HashSet, fs::OpenOptions, io::Write, path::PathBuf, time::SystemTime};
+
+use std::{
+    fs::{File, OpenOptions},
+    io::{BufWriter, Write},
+    path::{Path, PathBuf},
+    time::SystemTime,
+};
 
 use anyhow::Result;
 use dircpy::*;
 use vina_story::content::{Character, Game, Scene};
-pub fn generate_proj(
-    ren_path: String,
-    project_name: String,
 
-    description: String,
-
-    output_dir: std::path::PathBuf,
-    game: Game,
-) -> Result<()> {
-    let mut project_path = output_dir.clone();
-    project_path.push(project_name.clone());
+pub fn generate_proj(game: &Game, output_dir: &Path) -> Result<()> {
+    let mut project_path = output_dir.to_path_buf();
+    project_path.push(game.name.clone());
 
     let d = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .expect("Duration since UNIX_EPOCH failed");
 
-    copy_dir("./template/template", project_path.clone())?;
-    copy_dir("./images", project_path.join("game/images"))?;
+    copy_dir("./template/template", project_path.clone()).unwrap();
+    copy_dir("./images", project_path.join("game/images")).unwrap();
 
     let mut file = OpenOptions::new()
         .append(true)
-        .open(project_path.join("game/options.rpy"))?;
+        .write(true)
+        .open(project_path.join("game/options.rpy"))
+        .unwrap();
 
     writeln!(
         file,
@@ -32,23 +33,23 @@ pub fn generate_proj(
         "template",
         d.as_secs()
     )?;
+    writeln!(file, r#"define config.name = _("{}")"#, game.name)?;
+    writeln!(file, r#"define build.name = _("{}")"#, game.name)?;
+
+    // TODO fill this in with the game's synopsis
     writeln!(
         file,
-        r#"define config.name = _("{}")"#,
-        project_name.clone()
+        r#"define gui.about = _p("""{}""")"#,
+        "ai generated visual novel"
     )?;
-    writeln!(file, r#"define build.name = _("{}")"#, project_name.clone())?;
 
-    writeln!(file, r#"define gui.about = _p("""{}""")"#, description)?;
-
-    write_script(project_path, game)?;
+    let script_path = project_path.join("game/script.rpy");
+    let mut ctx = ScriptCtx::new(script_path);
+    write_script(&mut ctx, &game)?;
 
     Ok(())
 }
-pub fn write_script(project_path: PathBuf, game: Game) -> Result<()> {
-    let mut file = OpenOptions::new()
-        .append(true)
-        .open(project_path.join("game/script.rpy"))?;
+
 
     //Character definitions
     for (i, c) in game.characters.iter().enumerate() {
@@ -104,9 +105,89 @@ pub fn write_script(project_path: PathBuf, game: Game) -> Result<()> {
             } else {
                 writeln!(file, r#"{} "{}""#, " ".repeat(indentation), d.content)?;
             }
+
+pub struct ScriptCtx {
+    /// Indentation in number of tabs
+    indent: usize,
+    writer: BufWriter<File>,
+}
+
+impl ScriptCtx {
+    pub fn new(output: PathBuf) -> Self {
+        let file = OpenOptions::new()
+            .create(true)
+            .truncate(true)
+            .write(true)
+            .open(output)
+            .unwrap();
+
+        Self {
+            indent: 0,
+            writer: BufWriter::new(file),
         }
     }
 
-    writeln!(file, "return")?;
-    return Ok(());
+    pub fn indent_level(&self) -> usize {
+        self.indent * 4
+    }
+
+    pub fn indent(&mut self) {
+        self.indent += 1;
+    }
+
+    pub fn unindent(&mut self) {
+        self.indent = self.indent.saturating_sub(1);
+    }
+
+    pub fn write(&mut self, content: String) -> Result<()> {
+        let indent = " ".repeat(self.indent_level());
+        writeln!(self.writer, "{indent}{content}")?;
+        Ok(())
+    }
+}
+
+pub fn write_script(ctx: &mut ScriptCtx, game: &Game) -> Result<()> {
+    // Character definitions
+    for c in game.characters.iter() {
+        ctx.write(format!(r#"define {} = Character("{}")"#, c.name, c.name))?;
+    }
+
+    ctx.write(format!("label start:"))?;
+    for (i, scene) in game.scenes.iter().enumerate() {
+        gen_scene(ctx, game, &scene, i)?;
+    }
+
+    ctx.write(format!("return"))?;
+    Ok(())
+}
+
+fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Result<()> {
+    ctx.write(format!("label scene_{}:", i))?;
+    ctx.indent();
+
+    ctx.write(format!("scene bg bg_{}", i))?;
+
+    ctx.write(format!("zoom 1.875"))?;
+
+    for d in scene.script.iter() {
+        if game
+            .characters
+            .iter()
+            .map(|c| c.name.clone())
+            .collect::<Vec<String>>()
+            .contains(&d.speaker)
+        {
+            ctx.write(format!(
+                r#"{} "{}""#,
+                d.speaker,
+                d.content.split(": ").last().unwrap_or(d.content.as_str())
+            ))?;
+        } else {
+            ctx.write(format!(r#""{}""#, d.content))?;
+
+        }
+    }
+    ctx.unindent();
+
+    Ok(())
 }
