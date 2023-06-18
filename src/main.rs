@@ -2,8 +2,10 @@ use std::{
     fs::{self, OpenOptions},
     io::Write,
     path::PathBuf,
+    process::Command,
 };
 
+use anyhow::Result;
 use clap::Parser;
 use dotenvy::dotenv;
 use vina_sd::{generate_character_art, generate_location_art};
@@ -59,6 +61,7 @@ fn main() {
     // TODO can generate project name from prompt too
     // let project_name = args.name.unwrap_or(String::from("VINA game"));
     generate_proj(&game, &args.out).unwrap();
+    run_game(&PathBuf::from(ren_path), &args.out, &game).unwrap();
 }
 
 fn generate_game(args: &Cli, openai_token: &str) -> Game {
@@ -93,4 +96,13 @@ fn generate_game(args: &Cli, openai_token: &str) -> Game {
 
         game
     }
+}
+pub fn run_game(ren_path: &PathBuf, out: &PathBuf, game: &Game) -> Result<()> {
+    if cfg!(target_os = "windows") {
+    } else {
+        Command::new(ren_path.to_str().unwrap())
+            .args([out.join(game.name.clone()).to_str().unwrap(), "run"])
+            .output()?;
+    }
+    Ok(())
 }
