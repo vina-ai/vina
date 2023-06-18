@@ -1,4 +1,8 @@
-use std::{fs::OpenOptions, io::Write, path::PathBuf};
+use std::{
+    fs::{self, OpenOptions},
+    io::Write,
+    path::PathBuf,
+};
 
 use clap::Parser;
 use dotenvy::dotenv;
@@ -18,6 +22,9 @@ struct Cli {
     /// Save the generated game data to file
     #[arg(long, default_value_t = false)]
     save: bool,
+    /// Load game files from RON
+    #[arg(long)]
+    game_file: Option<String>,
 }
 
 fn main() {
@@ -30,27 +37,9 @@ fn main() {
 
     let novelai_client = vina_sd::api::ApiClient::new(novelai_url);
 
-    println!("Generating game...");
-    let prompt = "Write a love story about two visual novel developers.";
-    let game = generate_story(&openai_token, prompt).unwrap();
-    println!("{:?}", game);
+    let game = generate_game(&args, &openai_token);
 
-    // Write completed game to file to be reloaded
-    if args.save {
-        let path = PathBuf::from("./game.ron");
-        let mut file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(path)
-            .unwrap();
-        let ron_encoded = ron::ser::to_string_pretty(&game, ron::ser::PrettyConfig::default())
-            .expect("Error serializing game object");
-        file.write_all(ron_encoded.as_bytes()).unwrap();
-    }
-
-    return;
-
+    /*
     // Generate art for each character
     for character in game.characters.iter() {
         let character_description = generate_character_prompt(&openai_token, &character).unwrap();
@@ -69,9 +58,44 @@ fn main() {
             &location_description,
         );
     }
+    */
 
     // TODO can generate project name from prompt too
     // let project_name = args.name.unwrap_or(String::from("VINA game"));
     let project_path = PathBuf::from("./");
     generate_proj(&game, &project_path);
+}
+
+fn generate_game(args: &Cli, openai_token: &str) -> Game {
+    if let Some(game_file) = &args.game_file {
+        println!("Loading game from file...");
+
+        let path = PathBuf::from(game_file);
+        let contents = fs::read_to_string(&path).unwrap();
+        let game: Game = ron::from_str(&contents).unwrap();
+        game
+    } else {
+        // Otherwise generate game from scratch
+
+        println!("Generating game...");
+        let prompt = "Write a love story about two visual novel developers.";
+        let game = generate_story(openai_token, prompt).unwrap();
+        println!("{:?}", game);
+
+        // Write completed game to file to be reloaded
+        if args.save {
+            let path = PathBuf::from("./game.ron");
+            let mut file = OpenOptions::new()
+                .write(true)
+                .create(true)
+                .truncate(true)
+                .open(path)
+                .unwrap();
+            let ron_encoded = ron::ser::to_string_pretty(&game, ron::ser::PrettyConfig::default())
+                .expect("Error serializing game object");
+            file.write_all(ron_encoded.as_bytes()).unwrap();
+        }
+
+        game
+    }
 }
