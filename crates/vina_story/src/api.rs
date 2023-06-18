@@ -101,6 +101,12 @@ impl ApiClient {
 
 /// Parse a function call
 pub fn parse_fncall<T: DeserializeOwned>(msg: &Value) -> anyhow::Result<T> {
+    let fn_args = parse_fncall_raw(msg)?;
+    let downcasted = serde_json::from_value(fn_args)?;
+    Ok(downcasted)
+}
+
+pub fn parse_fncall_raw(msg: &Value) -> anyhow::Result<Value> {
     let fn_call = &msg["function_call"];
     let fn_name = fn_call["name"].as_str().unwrap();
 
@@ -108,10 +114,7 @@ pub fn parse_fncall<T: DeserializeOwned>(msg: &Value) -> anyhow::Result<T> {
     let fn_args = fn_call["arguments"].as_str().unwrap();
     let mut fn_args: Value = serde_json::from_str(fn_args).unwrap();
     let fn_args = fn_args["inner"].take();
-
-    let downcasted = serde_json::from_value(fn_args)?;
-
-    Ok(downcasted)
+    Ok(fn_args)
 }
 
 /// Parse text content
@@ -177,7 +180,9 @@ pub fn get_scenes_fn() -> Value {
                                 "description:": "Descriptive title of the scene based on it's contents",
                             },
                             "music": {
-                                "type": "string",
+                                "enum": [
+                                    "Funky", "Calm", "Dark", "Inspirational", "Bright", "Dramatic", "Happy", "Romantic", "Angry", "Sad"
+                                ],
                                 "description": "Genre of music that should be played in this scene",
                             },
                             "location": {
@@ -196,41 +201,48 @@ pub fn get_scenes_fn() -> Value {
                                         "type": "string",
                                         "description": "Landmarks and objects of focus that are present in the scene. Omit any descriptions of people.",
                                     },
-                                    "mood": {
-                                        "type": "string",
-                                        "description": "Information about the mood. Omit any descriptions of people.",
-                                    },
                                     "time_of_day": {
                                         "type": "string",
                                         "description": "What time of day it is",
                                     },
                                 }
                             },
-                            "script": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "description": "A line in the script, contains information like the speaker, choose a facial expression from this list: smiling, crying, nervous, excited, blushing to match what is being said, and also what is being said",
-                                    "properties": {
-                                        "speaker": {
-                                            "type": "string",
-                                            "description": "Name of the speaker"
-                                        },
-                                        "facial_expression": {
-                                            "type": "string",
-                                            "description": "Use an emotion from this list: smiling, crying, nervous, excited, blushing to match the dialogue spoken"
-                                        },
-                                        "content": {
-                                            "type": "string",
-                                            "description": "What the speaker actually says"
-                                        }
-                                    }
-                                }
-
-                            },
                         }
                     }
+                },
+            },
+            "required": ["inner"],
+        }
+    })
+}
 
+pub fn get_script_fn() -> Value {
+    json!({
+        "name": "get_script_fn",
+        "description": "Script to be used in scene",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "inner": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "description": "A line in the script, contains information like the speaker, what is being said, and facial expression",
+                        "properties": {
+                            "speaker": {
+                                "type": "string",
+                                "description": "Name of the speaker"
+                            },
+                            "facial_expression": {
+                                "type": "string",
+                                "description": "Use an emotion from this list: smiling, crying, nervous, excited, blushing to match the dialogue spoken"
+                            },
+                            "content": {
+                                "type": "string",
+                                "description": "What the speaker says"
+                            }
+                        }
+                    }
                 },
 
             },

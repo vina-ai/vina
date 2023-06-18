@@ -53,8 +53,6 @@ pub struct Location {
     pub description: String,
     /// Concrete objects and landmarks in the scene
     pub landmarks: String,
-    /// Information on the mood and time of day
-    pub mood: String,
     /// Time of day
     pub time_of_day: String,
 }
