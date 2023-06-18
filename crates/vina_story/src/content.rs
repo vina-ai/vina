@@ -2,6 +2,8 @@
 
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
+use crate::music::Theme;
+
 /// Configurable aspects when generating the dialogue
 pub struct Settings {
     // dialogue length (how long and detaile deach scene should be)
@@ -39,6 +41,8 @@ pub struct Scene {
     /// Description of the physical location the scene takes place in
     pub location: Location,
     pub script: Vec<Dialogue>,
+    /// Genre of music to be played in the scene
+    pub music: Theme,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
