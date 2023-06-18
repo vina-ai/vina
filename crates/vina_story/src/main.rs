@@ -5,6 +5,7 @@ use vina_story::{
 };
 
 fn main() {
+    /*
     let token = std::env::var("OPENAI_KEY").expect("Could not get OPENAI_KEY");
 
     let game = generate_story(&token).unwrap();
@@ -14,4 +15,5 @@ fn main() {
         let character_description = generate_character_prompt(&token, &character).unwrap();
         println!("{character_description}");
     }
+    */
 }
