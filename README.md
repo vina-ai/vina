@@ -19,10 +19,24 @@ and polished visual novel you can play.
 
 With the following prompt:
 ```
-Write a sci-fi story about a hackathon project gone haywire, where two friends are working together on a coding project over the weekend. Then, they are sucked into their laptop and have to find a way back to reality. They overcome an obstacle and successfully return back home.
+Write a sci-fi story about a hackathon project gone haywire, where twofriends are working
+together on a coding project over the weekend. Then, they are sucked into their laptop and
+have to find a way back to reality. They overcome an obstacle and successfully return back home.
 ```
 
 We get this visual novel.
+
+## Features
+
+Dynamic facial expressions depending on the dialogue
+<div>
+  <img src="media/lisa_base.png" width="30%" />
+  <img src="media/lisa_cry.png" width="30%" />
+</div>
+<div>
+  <img src="media/alex_base.png" width="30%" />
+  <img src="media/alex_anger.png" width="30%" />
+</div>
 
 ## Usage
 
