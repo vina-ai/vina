@@ -2,6 +2,7 @@
 
 pub mod api;
 pub mod content;
+pub mod music;
 
 use content::Location;
 
@@ -54,6 +55,17 @@ pub fn generate_location_prompt(token: &str, location: &Location) -> anyhow::Res
             location.description, location.landmarks, location.mood, location.time_of_day
         ),
     )
+}
+
+/// Pick youtube links given a description of the mood
+pub fn generate_music_prompts(token: &str, prompt: Vec<&str>) -> anyhow::Result<Vec<String>> {
+    let music_urls = vec![];
+
+    let mut client = ApiClient::new(token);
+
+    println!("Generating music...");
+
+    Ok(music_urls)
 }
 
 fn generate_prompt(token: &str, prompt: &str) -> anyhow::Result<String> {

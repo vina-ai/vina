@@ -21,6 +21,7 @@ pub fn generate_proj(game: &Game, output_dir: &Path) -> Result<()> {
     copy_dir("./images", project_path.join("game/images")).unwrap();
 
     let mut file = OpenOptions::new()
+        .create(true)
         .append(true)
         .open(project_path.join("game/options.rpy"))
         .unwrap();
@@ -117,7 +118,6 @@ fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Resul
 
     ctx.write(format!("scene bg bg_{}:", i))?;
     ctx.indent();
-
     ctx.write(format!("zoom 2"))?;
     ctx.unindent();
 
