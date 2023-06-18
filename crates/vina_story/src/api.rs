@@ -212,7 +212,7 @@ pub fn get_scenes_fn() -> Value {
                                             "type": "string",
                                             "description": "Name of the speaker"
                                         },
-                                        "facial expression": {
+                                        "expression": {
                                             "type": "string",
                                             "description": "Use an emotion from this list: smiling, crying, nervous, excited, blushing to match the dialogue spoken"
                                         },
