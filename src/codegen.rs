@@ -17,12 +17,14 @@ pub fn generate_proj(game: &Game, output_dir: &Path) -> Result<()> {
         .duration_since(SystemTime::UNIX_EPOCH)
         .expect("Duration since UNIX_EPOCH failed");
 
-    copy_dir("./template/template", project_path.clone())?;
-    copy_dir("./images", project_path.join("game/images"))?;
+    copy_dir("./template/template", project_path.clone()).unwrap();
+    copy_dir("./images", project_path.join("game/images")).unwrap();
 
     let mut file = OpenOptions::new()
         .append(true)
-        .open(project_path.join("game/options.rpy"))?;
+        .write(true)
+        .open(project_path.join("game/options.rpy"))
+        .unwrap();
 
     writeln!(
         file,
@@ -55,10 +57,15 @@ pub struct ScriptCtx {
 
 impl ScriptCtx {
     pub fn new(output: PathBuf) -> Self {
-        let file = OpenOptions::new().append(true).open(output).unwrap();
+        let file = OpenOptions::new()
+            .create(true)
+            .truncate(true)
+            .write(true)
+            .open(output)
+            .unwrap();
 
         Self {
-            indent: 1,
+            indent: 0,
             writer: BufWriter::new(file),
         }
     }
@@ -89,7 +96,6 @@ pub fn write_script(ctx: &mut ScriptCtx, game: &Game) -> Result<()> {
     }
 
     ctx.write(format!("label start:"))?;
-    ctx.indent();
     for (i, scene) in game.scenes.iter().enumerate() {
         gen_scene(ctx, game, &scene, i)?;
     }
@@ -100,13 +106,11 @@ pub fn write_script(ctx: &mut ScriptCtx, game: &Game) -> Result<()> {
 
 fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Result<()> {
     ctx.write(format!("label scene_{}:", i))?;
+    ctx.indent();
 
-    ctx.indent();
-    ctx.write(format!("scene bg bg_{}:", i))?;
-    ctx.indent();
+    ctx.write(format!("scene bg bg_{}", i))?;
 
     ctx.write(format!("zoom 1.875"))?;
-    ctx.unindent();
 
     for d in scene.script.iter() {
         if game
@@ -125,6 +129,7 @@ fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Resul
             ctx.write(format!(r#""{}""#, d.content))?;
         }
     }
+    ctx.unindent();
 
     Ok(())
 }

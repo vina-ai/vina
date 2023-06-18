@@ -63,7 +63,7 @@ fn main() {
     // TODO can generate project name from prompt too
     // let project_name = args.name.unwrap_or(String::from("VINA game"));
     let project_path = PathBuf::from("./");
-    generate_proj(&game, &project_path);
+    generate_proj(&game, &project_path).unwrap();
 }
 
 fn generate_game(args: &Cli, openai_token: &str) -> Game {
