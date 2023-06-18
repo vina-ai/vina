@@ -1,7 +1,7 @@
 use std::{
     fs::{File, OpenOptions},
     io::{BufWriter, Write},
-    path::PathBuf,
+    path::{Path, PathBuf},
     time::SystemTime,
 };
 
@@ -9,15 +9,9 @@ use anyhow::Result;
 use dircpy::*;
 use vina_story::content::{Character, Game, Scene};
 
-pub fn generate_proj(
-    ren_path: String,
-    project_name: String,
-    description: String,
-    output_dir: std::path::PathBuf,
-    game: Game,
-) -> Result<()> {
-    let mut project_path = output_dir.clone();
-    project_path.push(project_name.clone());
+pub fn generate_proj(game: &Game, output_dir: &Path) -> Result<()> {
+    let mut project_path = output_dir.to_path_buf();
+    project_path.push(game.name.clone());
 
     let d = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
@@ -36,14 +30,15 @@ pub fn generate_proj(
         "template",
         d.as_secs()
     )?;
+    writeln!(file, r#"define config.name = _("{}")"#, game.name)?;
+    writeln!(file, r#"define build.name = _("{}")"#, game.name)?;
+
+    // TODO fill this in with the game's synopsis
     writeln!(
         file,
-        r#"define config.name = _("{}")"#,
-        project_name.clone()
+        r#"define gui.about = _p("""{}""")"#,
+        "ai generated visual novel"
     )?;
-    writeln!(file, r#"define build.name = _("{}")"#, project_name.clone())?;
-
-    writeln!(file, r#"define gui.about = _p("""{}""")"#, description)?;
 
     let script_path = project_path.join("game/script.rpy");
     let mut ctx = ScriptCtx::new(script_path);
@@ -77,7 +72,7 @@ impl ScriptCtx {
     }
 
     pub fn unindent(&mut self) {
-        self.indent.saturating_sub(1);
+        self.indent = self.indent.saturating_sub(1);
     }
 
     pub fn write(&mut self, content: String) -> Result<()> {
