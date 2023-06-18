@@ -68,7 +68,12 @@ pub fn generate_character_art(client: &ApiClient, character: &Character, prompt:
     write_to_file(base_rembg, &path).unwrap();
 }
 
-pub fn generate_location_art(client: &ApiClient, location: &Location, prompt: &str) {
+pub fn generate_location_art(
+    client: &ApiClient,
+    f_name: String,
+    location: &Location,
+    prompt: &str,
+) {
     println!("Generating location art...");
     let body: Value = json!({
         "prompt": prompt,
@@ -81,6 +86,6 @@ pub fn generate_location_art(client: &ApiClient, location: &Location, prompt: &s
         "cfg_scale": 7.5
     });
     let base = client.request(body, "sdapi/v1/txt2img").unwrap();
-    let path = PathBuf::from(format!("{}.png", location.name));
+    let path = PathBuf::from(format!("images/bg bg_{f_name}.png"));
     write_to_file(base, &path).unwrap();
 }

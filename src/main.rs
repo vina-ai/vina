@@ -1,8 +1,10 @@
 use clap::Parser;
 use dotenvy::dotenv;
-use vina_codegen::generate_proj;
 use vina_sd::{generate_character_art, generate_location_art};
 use vina_story::{content::*, generate_character_prompt, generate_location_prompt, generate_story};
+
+mod codegen;
+use codegen::generate_proj;
 
 #[derive(Parser)]
 struct Cli {
@@ -11,8 +13,8 @@ struct Cli {
     out: std::path::PathBuf,
 }
 fn main() {
-    // let args = Cli::parse();
-    // dotenv().ok();
+    let args = Cli::parse();
+    dotenv().ok();
 
     let ren_path: String = std::env::var("REN_PATH").unwrap_or("renpy".to_string());
     let openai_token = std::env::var("OPENAI_KEY").expect("Could not get OPENAI_KEY");
@@ -35,27 +37,16 @@ fn main() {
         generate_character_art(&novelai_client, &character, &character_description);
     }
     */
-    for scene in game.scenes {
+    for (i, scene) in game.scenes.iter().enumerate() {
         let location_description =
             generate_location_prompt(&openai_token, &scene.location).unwrap();
-        generate_location_art(&novelai_client, &scene.location, &location_description);
+        let location = generate_location_art(
+            &novelai_client,
+            i.to_string(),
+            &scene.location,
+            &location_description,
+        );
     }
 
-    /*
-
-    match generate_proj(
-        ren_path,
-        args.name,
-        args.prompt,
-        args.out,
-        scenes,
-        characters,
-    ) {
-        Ok(()) => return,
-        Err(error) => {
-            println!("{:?}", error);
-            return;
-        },
-    }
-    */
+    generate_proj(ren_path, args.name, args.prompt, args.out, game);
 }

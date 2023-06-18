@@ -9,7 +9,6 @@ repository = "https://github.com/PrideHacks2023/vina"
 
 [workspace]
 members = [
-    "crates/vina_codegen",
     "crates/vina_story",
     "crates/vina_sd",
 ]
@@ -20,9 +19,12 @@ members = [
 dotenv = "0.15.0"
 clap = { version = "4.3.4", features = ["derive"] }
 dotenvy = "0.15.7"
+anyhow = "1.0.71"
+dircpy = "0.3.14"
 
-vina_codegen = {path = "crates/vina_codegen"}
+
 vina_story = {path = "crates/vina_story"}
 vina_sd = { path = "crates/vina_sd" }
+
 
 
