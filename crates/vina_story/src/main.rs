@@ -1,7 +1,10 @@
+use std::path::PathBuf;
+
 use vina_story::{
     api::*,
     content::{Character, Game, Scene},
     generate_character_prompt, generate_story,
+    music::{choose_music, fetch_music},
 };
 
 fn main() {
@@ -16,4 +19,7 @@ fn main() {
         println!("{character_description}");
     }
     */
+
+    let music_id = choose_music(vina_story::music::Theme::Romantic);
+    fetch_music(&music_id, &PathBuf::from("./audio.mp3")).unwrap();
 }
