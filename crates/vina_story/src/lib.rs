@@ -36,7 +36,13 @@ pub fn generate_story(token: &str, prompt: &str) -> anyhow::Result<Game> {
     let mut val_scenes: Vec<Value> = vec![];
     for (i, raw_scene) in raw_scenes.as_array().unwrap().iter().enumerate() {
         let scene_number = i + 1;
-        let res = story_client.run_prompt(&format!("For scene {scene_number}, write me a script with a lot of speaking. Prioritize number of lines of dialogue. When writing each line of dialogue, take into account the personality and mood of the character as well as the setting. Do not use a narrator. Ensure that the script transitions smoothly into the next scene. Return the result in a list. Also include facial expression from this list: smiling, crying, nervous, excited, blushing to match the dialogue spoken."), Some(get_script_fn())).unwrap();
+
+        let prompt = format!(
+            r#"For scene {scene_number}, write me a script with a lot of speaking. Prioritize number of lines of dialogue. When writing each line of dialogue, take into account the personality and mood of the character as well as the setting. Do not use a narrator. Ensure that the script transitions smoothly into the next scene. Return the result in a list. Also include facial expression from this list: smiling, crying, nervous, excited, blushing to match the dialogue spoken. Output as json."#
+        );
+        let res = story_client
+            .run_prompt(&prompt, Some(get_script_fn()))
+            .unwrap();
 
         let script: Vec<Dialogue> = parse_fncall(&res).unwrap();
 
@@ -53,7 +59,6 @@ pub fn generate_story(token: &str, prompt: &str) -> anyhow::Result<Game> {
         name: String::from("VinaGame"),
         synopsis: String::new(),
         characters,
-        // scenes: vec![],
         scenes,
     };
     Ok(game)
