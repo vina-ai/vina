@@ -9,6 +9,9 @@ use std::{
 use anyhow::Result;
 use dircpy::*;
 use vina_story::content::{Character, Game, Scene};
+const EXPRESSIONS: [&str; 6] = [
+    "base", "smiling", "crying", "nervous", "excited", "blushing",
+];
 
 pub fn generate_proj(game: &Game, output_dir: &Path) -> Result<()> {
     let mut project_path = output_dir.to_path_buf();
@@ -101,9 +104,8 @@ pub fn write_script(ctx: &mut ScriptCtx, game: &Game) -> Result<()> {
     for c in game.characters.iter() {
         ctx.write(format!(r#"define {} = Character("{}")"#, c.name, c.name))?;
         ctx.write(format!(r#"image {}_img = "{}.png""#, c.name, c.name))?;
-        let expressions = vec!["smiling", "crying", "nervous", "excited", "blushing"];
 
-        for emotion in expressions {
+        for emotion in EXPRESSIONS {
             ctx.write(format!(
                 r#"image {}_img {} = "{}_{}.png""#,
                 c.name, emotion, c.name, emotion
@@ -152,9 +154,14 @@ fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Resul
                 d.speaker,
                 d.content.split(": ").last().unwrap_or(d.content.as_str())
             ))?;
+            let express: String = if EXPRESSIONS.contains(&d.facial_expression.as_str()) {
+                d.facial_expression.clone()
+            } else {
+                "base".to_string()
+            };
             ctx.write(format!(
                 "show {}_img {} at {}",
-                d.speaker, d.facial_expression, char_pos[&d.speaker]
+                d.speaker, express, char_pos[&d.speaker]
             ))?;
         } else {
             ctx.write(format!(r#""{}""#, d.content))?;
