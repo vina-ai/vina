@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     fs::{File, OpenOptions},
     io::{BufWriter, Write},
     path::{Path, PathBuf},
@@ -99,6 +100,12 @@ pub fn write_script(ctx: &mut ScriptCtx, game: &Game) -> Result<()> {
     for c in game.characters.iter() {
         ctx.write(format!(r#"define {} = Character("{}")"#, c.name, c.name))?;
         ctx.write(format!(r#"image {}_img = "{}.png""#, c.name, c.name))?;
+        // for emotion in game.characters.emotions.iter() {
+        //     ctx.write(format!(
+        //         r#"image {}_img {} = "{}_{}.png""#,
+        //         c.name, emotion, c.name, emotion
+        //     ))?;
+        // }
     }
 
     ctx.write(format!("label start:"))?;
@@ -111,7 +118,7 @@ pub fn write_script(ctx: &mut ScriptCtx, game: &Game) -> Result<()> {
 }
 
 fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Result<()> {
-    let mut seen: Vec<String> = vec![];
+    let mut char_pos: HashMap<String, String> = HashMap::new();
     ctx.write(format!("label scene_{}:", i))?;
     ctx.indent();
 
@@ -129,14 +136,18 @@ fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Resul
             .collect::<Vec<String>>()
             .contains(&d.speaker)
         {
-            if !seen.contains(&d.speaker) {
-                seen.push(d.speaker.clone());
-                let position = match seen.len() {
+            if !char_pos.contains_key(&d.speaker) {
+                let position = match char_pos.len() {
                     1 => "left",
                     2 => "right",
                     _ => "center",
                 };
-                ctx.write(format!("show {}_img at {}", d.speaker, position))?;
+
+                char_pos.insert(d.speaker.clone(), position.to_string());
+                // ctx.write(format!(
+                //     "show {}_img {} at {}",
+                //     d.speaker, d.emotion, position
+                // ))?;
             }
             ctx.write(format!(
                 r#"{} "{}""#,

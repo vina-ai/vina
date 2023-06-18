@@ -44,7 +44,12 @@ fn main() {
         let character_description = generate_character_prompt(&openai_token, &character).unwrap();
         // println!("{character_description}");
         let expressions = vec!["laughing", "crying", "angry"];
-        generate_character_art(&novelai_client, &character, &character_description, expressions);
+        generate_character_art(
+            &novelai_client,
+            &character,
+            &character_description,
+            expressions,
+        );
     }
 
     // Generate art for each scene

@@ -19,7 +19,12 @@ use vina_story::content::{Character, Location};
 
 use crate::api::{write_to_file, ApiClient, NEGATIVE_PROMPT};
 
-pub fn generate_character_art(client: &ApiClient, character: &Character, prompt: &str, expressions: Vec<&str>) {
+pub fn generate_character_art(
+    client: &ApiClient,
+    character: &Character,
+    prompt: &str,
+    expressions: Vec<&str>,
+) {
     println!("Generating base character...");
     let body: Value = json!({
         "prompt": prompt,
@@ -64,13 +69,13 @@ pub fn generate_character_art(client: &ApiClient, character: &Character, prompt:
         ],
     });
     let base_rembg = client.request(body, "sdapi/v1/img2img").unwrap();
-    
+
     let path = PathBuf::from(format!("images/{}_base.png", character.name));
     write_to_file(base_rembg, &path).unwrap();
 
     for ex in expressions {
         println!("Generating {} facial expression...", ex);
-        let body: Value = json!{{
+        let body: Value = json! {{
             "init_images": vec![format!("data:image/png;base64,{base}")],
             "seed": -1,
             "prompt": format!("{}, {}", ex, prompt),
@@ -107,7 +112,7 @@ pub fn generate_character_art(client: &ApiClient, character: &Character, prompt:
             ],
         });
         let base_rembg = client.request(body, "sdapi/v1/img2img").unwrap();
-        
+
         let path = PathBuf::from(format!("images/{}_{}.png", character.name, ex));
         write_to_file(base_rembg, &path).unwrap();
     }
