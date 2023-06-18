@@ -1,4 +1,3 @@
-
 use std::{
     fs::{File, OpenOptions},
     io::{BufWriter, Write},
@@ -23,7 +22,6 @@ pub fn generate_proj(game: &Game, output_dir: &Path) -> Result<()> {
 
     let mut file = OpenOptions::new()
         .append(true)
-        .write(true)
         .open(project_path.join("game/options.rpy"))
         .unwrap();
 
@@ -49,62 +47,6 @@ pub fn generate_proj(game: &Game, output_dir: &Path) -> Result<()> {
 
     Ok(())
 }
-
-
-    //Character definitions
-    for (i, c) in game.characters.iter().enumerate() {
-        writeln!(file, r#"define {} = Character("{}")"#, c.name, c.name)?;
-        writeln!(file, r#"image {}_img = "{}.png""#, c.name, c.name)?;
-    }
-
-    writeln!(file, "label start:")?;
-    for (i, s) in game.scenes.into_iter().enumerate() {
-        let mut seen: Vec<String> = vec![];
-        let mut indentation = 4;
-
-        writeln!(file, "{}label scene_{}:", " ".repeat(indentation), i)?;
-
-        indentation += 4;
-        writeln!(file, "{}scene bg bg_{}:", " ".repeat(indentation), i)?;
-        indentation += 4;
-
-        writeln!(file, "{}zoom 2", " ".repeat(indentation))?;
-        indentation -= 4;
-
-        for d in s.script {
-            if game
-                .characters
-                .iter()
-                .map(|c| c.name.clone())
-                .collect::<Vec<String>>()
-                .contains(&d.speaker)
-            {
-                if !seen.contains(&d.speaker) {
-                    seen.push(d.speaker.clone());
-                    let position = match seen.len() {
-                        1 => "left",
-                        2 => "right",
-                        _ => "center",
-                    };
-                    writeln!(
-                        file,
-                        "{}show {}_img at {}",
-                        " ".repeat(indentation),
-                        d.speaker,
-                        position
-                    )?;
-                    //display character
-                }
-                writeln!(
-                    file,
-                    r#"{}{} "{}""#,
-                    " ".repeat(indentation),
-                    d.speaker,
-                    d.content.split(": ").last().unwrap_or(d.content.as_str())
-                )?;
-            } else {
-                writeln!(file, r#"{} "{}""#, " ".repeat(indentation), d.content)?;
-            }
 
 pub struct ScriptCtx {
     /// Indentation in number of tabs
@@ -147,9 +89,16 @@ impl ScriptCtx {
 }
 
 pub fn write_script(ctx: &mut ScriptCtx, game: &Game) -> Result<()> {
+    //Character definitions
+    // for (i, c) in game.characters.iter().enumerate() {
+    //     writeln!(file, r#"define {} = Character("{}")"#, c.name, c.name)?;
+    //     writeln!(file, r#"image {}_img = "{}.png""#, c.name, c.name)?;
+    // }
+
     // Character definitions
     for c in game.characters.iter() {
         ctx.write(format!(r#"define {} = Character("{}")"#, c.name, c.name))?;
+        ctx.write(format!(r#"image {}_img = "{}.png""#, c.name, c.name))?;
     }
 
     ctx.write(format!("label start:"))?;
@@ -162,12 +111,15 @@ pub fn write_script(ctx: &mut ScriptCtx, game: &Game) -> Result<()> {
 }
 
 fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Result<()> {
+    let mut seen: Vec<String> = vec![];
     ctx.write(format!("label scene_{}:", i))?;
     ctx.indent();
 
-    ctx.write(format!("scene bg bg_{}", i))?;
+    ctx.write(format!("scene bg bg_{}:", i))?;
+    ctx.indent();
 
-    ctx.write(format!("zoom 1.875"))?;
+    ctx.write(format!("zoom 2"))?;
+    ctx.unindent();
 
     for d in scene.script.iter() {
         if game
@@ -177,6 +129,15 @@ fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Resul
             .collect::<Vec<String>>()
             .contains(&d.speaker)
         {
+            if !seen.contains(&d.speaker) {
+                seen.push(d.speaker.clone());
+                let position = match seen.len() {
+                    1 => "left",
+                    2 => "right",
+                    _ => "center",
+                };
+                ctx.write(format!("show {}_img at {}", d.speaker, position))?;
+            }
             ctx.write(format!(
                 r#"{} "{}""#,
                 d.speaker,
@@ -184,7 +145,6 @@ fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Resul
             ))?;
         } else {
             ctx.write(format!(r#""{}""#, d.content))?;
-
         }
     }
     ctx.unindent();

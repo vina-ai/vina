@@ -14,11 +14,9 @@ use codegen::generate_proj;
 
 #[derive(Parser)]
 struct Cli {
-    // /// OVerride Name of the game
-    // name: Option<String>,
     // prompt: String,
     // /// Override the output path of project
-    // out: std::path::PathBuf,
+    out: std::path::PathBuf,
     /// Save the generated game data to file
     #[arg(long, default_value_t = false)]
     save: bool,
@@ -39,13 +37,11 @@ fn main() {
 
     let game = generate_game(&args, &openai_token);
 
-
     for character in game.characters.iter() {
         let character_description = generate_character_prompt(&openai_token, &character).unwrap();
         // println!("{character_description}");
         generate_character_art(&novelai_client, &character, &character_description);
     }
-
 
     // Generate art for each scene
 
@@ -59,12 +55,10 @@ fn main() {
             &location_description,
         );
     }
-    
 
     // TODO can generate project name from prompt too
     // let project_name = args.name.unwrap_or(String::from("VINA game"));
-    let project_path = PathBuf::from("./");
-    generate_proj(&game, &project_path).unwrap();
+    generate_proj(&game, &args.out).unwrap();
 }
 
 fn generate_game(args: &Cli, openai_token: &str) -> Game {
@@ -80,7 +74,7 @@ fn generate_game(args: &Cli, openai_token: &str) -> Game {
 
         println!("Generating game...");
         let prompt = "Write a love story about two visual novel developers.";
-        let game = generate_story(openai_token, prompt).unwrap();
+        let game: Game = generate_story(openai_token, prompt).unwrap();
         println!("{:?}", game);
 
         // Write completed game to file to be reloaded
