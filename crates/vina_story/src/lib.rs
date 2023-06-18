@@ -21,12 +21,12 @@ pub fn generate_story(token: &str, prompt: &str) -> anyhow::Result<Game> {
         .run_prompt("Generate a title for this story", None)
         .unwrap();
 
-    let res = story_client.run_prompt("Give me each of the characters in the story, along with detailed personality, clothing, and physical appearance details (include age, race, gender).", Some(get_characters_fn())).unwrap();
+    let res = story_client.run_prompt("Limit the number of characters to a maximum of 3. Give me each of the characters in the story, along with detailed personality, clothing, and physical appearance details (include age, race, gender).", Some(get_characters_fn())).unwrap();
 
     let characters: Vec<Character> = parse_fncall(&res).unwrap();
     // println!("CHARACTERS {:?}", characters);
 
-    let res = story_client.run_prompt("Separate the story into multiple scenes, and for each scene give me a long and detailed description of the setting of the scene, omit any descriptions of people, include the name of the location, physical location it takes place in, objects and landmarks in the scene, mood, and time of day. Also create a title each scene that corresponds to the contents of the scene. Furthermore, for each scene, write me a script and return the result in a list with each element as a character's dialogue, and use a facial expression from this list: smiling, crying, nervous, excited, blushing to match the dialogue spoken.", Some(get_scenes_fn())).unwrap();
+    let res = story_client.run_prompt("Limit the number of locations to a maximum of 5. Separate the story into multiple scenes, and for each scene give me a long and detailed description of the setting of the scene, omit any descriptions of people, include the name of the location, physical location it takes place in, objects and landmarks in the scene, mood, and time of day. Also create a title each scene that corresponds to the contents of the scene. Furthermore, for each scene, write me a script and return the result in a list with each element as a character's dialogue, and use a facial expression from this list: smiling, crying, nervous, excited, blushing to match the dialogue spoken.", Some(get_scenes_fn())).unwrap();
 
     let scenes: Vec<Scene> = parse_fncall(&res).unwrap();
     // println!("SCENES {:?}", scenes);
