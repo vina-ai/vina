@@ -20,7 +20,7 @@ use codegen::generate_proj;
 
 #[derive(Parser)]
 struct Cli {
-    // prompt: String,
+    prompt: String,
     // /// Override the output path of project
     out: std::path::PathBuf,
     /// Save the generated game data to file
@@ -107,8 +107,7 @@ fn generate_game(args: &Cli, openai_token: &str) -> Game {
         // Otherwise generate game from scratch
 
         println!("Generating game...");
-        let prompt = "Write a love story about two gay individuals falling in love and overcoming stigma and hardships.";
-        let game = generate_story(openai_token, prompt).unwrap();
+        let game = generate_story(openai_token, args.prompt.as_str()).unwrap();
         println!("{:?}", game);
 
         // Write completed game to file to be reloaded

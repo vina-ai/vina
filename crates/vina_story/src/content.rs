@@ -37,7 +37,7 @@ pub struct Character {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Scene {
     /// Name of the scene
-    pub title: String,
+    pub title: Option<String>,
     /// Description of the physical location the scene takes place in
     pub location: Location,
     pub script: Vec<Dialogue>,
