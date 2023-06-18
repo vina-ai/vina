@@ -38,6 +38,12 @@ Dynamic facial expressions depending on the dialogue
   <img src="media/alex_anger.png" width="30%" />
 </div>
 
+Generated background images for each scene
+<div>
+  <img src="media/bg0.png" width="70%" />
+  <img src="media/bg1.png" width="70%" />
+</div>
+
 ## Usage
 
 To run **VinA** for yourself, you need the following:
