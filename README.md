@@ -1,6 +1,6 @@
 <div align="center">
 
-# vina
+<img src="media/logo.png" alt="vina" />
 
 AI-powered visual novel generator
 
