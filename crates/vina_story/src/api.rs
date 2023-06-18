@@ -178,7 +178,7 @@ pub fn get_scenes_fn() -> Value {
                             },
                             "location": {
                                 "type": "object",
-                                "description:": "Description of the physical location the scene takes place in",
+                                "description:": "Description of the physical location the scene takes place in. Omit any descriptions of people.",
                                 "properties": {
                                     "name": {
                                         "type": "string",
@@ -194,7 +194,7 @@ pub fn get_scenes_fn() -> Value {
                                     },
                                     "mood": {
                                         "type": "string",
-                                        "description": "Information about the mood",
+                                        "description": "Information about the mood. Omit any descriptions of people.",
                                     },
                                     "time_of_day": {
                                         "type": "string",
@@ -206,11 +206,15 @@ pub fn get_scenes_fn() -> Value {
                                 "type": "array",
                                 "items": {
                                     "type": "object",
-                                    "description": "A line in the script, contains information like the speaker and also what is being said",
+                                    "description": "A line in the script, contains information like the speaker, a chosen expression from this list: smiling, crying, nervous, excited, blushing to match what is being said, and also what is being said",
                                     "properties": {
                                         "speaker": {
                                             "type": "string",
                                             "description": "Name of the speaker"
+                                        },
+                                        "facial expression": {
+                                            "type": "string",
+                                            "description": "Use an emotion from this list: smiling, crying, nervous, excited, blushing to match the dialogue spoken"
                                         },
                                         "content": {
                                             "type": "string",

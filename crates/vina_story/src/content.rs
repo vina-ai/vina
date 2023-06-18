@@ -59,6 +59,8 @@ pub struct Location {
 pub struct Dialogue {
     /// Name of character that is speaking
     pub speaker: String,
+    /// Facial expression of the character speaking
+    pub expression: String,
     /// Actual text content of the dialogue line
     pub content: String,
     // /// Description of which character sprite to use
