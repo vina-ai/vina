@@ -1,4 +1,4 @@
-use std::{fs::OpenOptions, io::Write, path::PathBuf, time::SystemTime};
+use std::{collections::HashSet, fs::OpenOptions, io::Write, path::PathBuf, time::SystemTime};
 
 use anyhow::Result;
 use dircpy::*;
@@ -51,12 +51,14 @@ pub fn write_script(project_path: PathBuf, game: Game) -> Result<()> {
         .open(project_path.join("game/script.rpy"))?;
 
     //Character definitions
-    for c in game.characters.iter() {
+    for (i, c) in game.characters.iter().enumerate() {
         writeln!(file, r#"define {} = Character("{}")"#, c.name, c.name)?;
+        writeln!(file, r#"image {}_img = "{}.png""#, c.name, c.name)?;
     }
 
     writeln!(file, "label start:")?;
     for (i, s) in game.scenes.into_iter().enumerate() {
+        let mut seen: Vec<String> = vec![];
         let mut indentation = 4;
 
         writeln!(file, "{}label scene_{}:", " ".repeat(indentation), i)?;
@@ -65,7 +67,7 @@ pub fn write_script(project_path: PathBuf, game: Game) -> Result<()> {
         writeln!(file, "{}scene bg bg_{}:", " ".repeat(indentation), i)?;
         indentation += 4;
 
-        writeln!(file, "{}zoom 1.875", " ".repeat(indentation))?;
+        writeln!(file, "{}zoom 2", " ".repeat(indentation))?;
         indentation -= 4;
 
         for d in s.script {
@@ -76,6 +78,22 @@ pub fn write_script(project_path: PathBuf, game: Game) -> Result<()> {
                 .collect::<Vec<String>>()
                 .contains(&d.speaker)
             {
+                if !seen.contains(&d.speaker) {
+                    seen.push(d.speaker.clone());
+                    let position = match seen.len() {
+                        1 => "left",
+                        2 => "right",
+                        _ => "center",
+                    };
+                    writeln!(
+                        file,
+                        "{}show {}_img at {}",
+                        " ".repeat(indentation),
+                        d.speaker,
+                        position
+                    )?;
+                    //display character
+                }
                 writeln!(
                     file,
                     r#"{}{} "{}""#,

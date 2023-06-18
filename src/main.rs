@@ -30,13 +30,11 @@ fn main() {
     .unwrap();
     println!("{:?}", game);
 
-    /*
-    for character in game.characters {
+    for character in game.characters.iter() {
         let character_description = generate_character_prompt(&openai_token, &character).unwrap();
         // println!("{character_description}");
         generate_character_art(&novelai_client, &character, &character_description);
     }
-    */
     for (i, scene) in game.scenes.iter().enumerate() {
         let location_description =
             generate_location_prompt(&openai_token, &scene.location).unwrap();

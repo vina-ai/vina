@@ -64,7 +64,7 @@ pub fn generate_character_art(client: &ApiClient, character: &Character, prompt:
         ],
     });
     let base_rembg = client.request(body, "sdapi/v1/img2img").unwrap();
-    let path = PathBuf::from(format!("{}.png", character.name));
+    let path = PathBuf::from(format!("images/{}.png", character.name));
     write_to_file(base_rembg, &path).unwrap();
 }
 
