@@ -9,7 +9,11 @@ use anyhow::Result;
 use clap::Parser;
 use dotenvy::dotenv;
 use vina_sd::{generate_character_art, generate_location_art};
-use vina_story::{content::*, generate_character_prompt, generate_location_prompt, generate_story};
+use vina_story::{
+    content::*,
+    generate_character_prompt, generate_location_prompt, generate_story,
+    music::{choose_music, fetch_music},
+};
 
 mod codegen;
 use codegen::generate_proj;
@@ -25,6 +29,15 @@ struct Cli {
     /// Load game files from RON
     #[arg(long)]
     game_file: Option<String>,
+    /// Skip generating characters
+    #[arg(long, default_value_t = false)]
+    skip_character: bool,
+    /// Skip generating background art
+    #[arg(long, default_value_t = false)]
+    skip_background: bool,
+    /// Skip generating music
+    #[arg(long, default_value_t = false)]
+    skip_music: bool,
 }
 
 fn main() {
@@ -40,29 +53,40 @@ fn main() {
     let game = generate_game(&args, &openai_token);
 
     // Generate art for each character
-    for character in game.characters.iter() {
-        let character_description = generate_character_prompt(&openai_token, &character).unwrap();
-        // println!("{character_description}");
-        let expressions = vec!["smiling", "crying", "nervous", "excited", "blushing"];
-        generate_character_art(
-            &novelai_client,
-            &character,
-            &character_description,
-            expressions,
-        );
+    if !args.skip_character {
+        for character in game.characters.iter() {
+            let character_description =
+                generate_character_prompt(&openai_token, &character).unwrap();
+            // println!("{character_description}");
+            let expressions = vec!["smiling", "crying", "nervous", "excited", "blushing"];
+            generate_character_art(
+                &novelai_client,
+                &character,
+                &character_description,
+                expressions,
+            );
+        }
     }
 
     // Generate art for each scene
-
     for (i, scene) in game.scenes.iter().enumerate() {
-        let location_description =
-            generate_location_prompt(&openai_token, &scene.location).unwrap();
-        let location = generate_location_art(
-            &novelai_client,
-            i.to_string(),
-            &scene.location,
-            &location_description,
-        );
+        if !args.skip_background {
+            let location_description =
+                generate_location_prompt(&openai_token, &scene.location).unwrap();
+            let location = generate_location_art(
+                &novelai_client,
+                i.to_string(),
+                &scene.location,
+                &location_description,
+            );
+        }
+
+        // Generate music for the scene
+        if !args.skip_music {
+            let music_id = choose_music(scene.music);
+            let music_path = PathBuf::from(format!("./music_{i}.mp3"));
+            fetch_music(&music_id, &music_path).unwrap();
+        }
     }
 
     // TODO can generate project name from prompt too

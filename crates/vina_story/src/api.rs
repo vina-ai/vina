@@ -176,6 +176,10 @@ pub fn get_scenes_fn() -> Value {
                                 "type": "string",
                                 "description:": "Descriptive title of the scene based on it's contents",
                             },
+                            "music": {
+                                "type": "string",
+                                "description": "Genre of music that should be played in this scene",
+                            },
                             "location": {
                                 "type": "object",
                                 "description:": "Description of the physical location the scene takes place in. Omit any descriptions of people.",
