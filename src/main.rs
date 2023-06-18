@@ -43,7 +43,7 @@ fn main() {
     for character in game.characters.iter() {
         let character_description = generate_character_prompt(&openai_token, &character).unwrap();
         // println!("{character_description}");
-        let expressions = vec!["laughing", "crying", "angry"];
+        let expressions = vec!["smiling", "crying", "nervous", "excited", "blushing"];
         generate_character_art(
             &novelai_client,
             &character,

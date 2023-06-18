@@ -4,3 +4,4 @@
 *.~undo-tree~
 Cargo.lock
 .env
+images

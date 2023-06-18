@@ -2,6 +2,7 @@
 
 pub mod api;
 pub mod content;
+pub mod music;
 
 use content::Location;
 
@@ -25,7 +26,7 @@ pub fn generate_story(token: &str, prompt: &str) -> anyhow::Result<Game> {
     let characters: Vec<Character> = parse_fncall(&res).unwrap();
     // println!("CHARACTERS {:?}", characters);
 
-    let res = story_client.run_prompt("Separate the story into multiple scenes, and for each scene give me a long and detailed description of the setting of the scene, include the name of the location, physical location it takes place in, objects and landmarks in the scene, mood, and time of day. Also create a title each scene that corresponds to the contents of the scene. Furthermore, for each scene, write me a script and return the result in a list with each element as a character's dialogue.", Some(get_scenes_fn())).unwrap();
+    let res = story_client.run_prompt("Separate the story into multiple scenes, and for each scene give me a long and detailed description of the setting of the scene, omit any descriptions of people, include the name of the location, physical location it takes place in, objects and landmarks in the scene, mood, and time of day. Also create a title each scene that corresponds to the contents of the scene. Furthermore, for each scene, write me a script and return the result in a list with each element as a character's dialogue, and choose a facial expression from this list: smiling, crying, nervous, excited, blushing to match the dialogue spoken.", Some(get_scenes_fn())).unwrap();
 
     let scenes: Vec<Scene> = parse_fncall(&res).unwrap();
     // println!("SCENES {:?}", scenes);
@@ -54,6 +55,17 @@ pub fn generate_location_prompt(token: &str, location: &Location) -> anyhow::Res
             location.description, location.landmarks, location.mood, location.time_of_day
         ),
     )
+}
+
+/// Pick youtube links given a description of the mood
+pub fn generate_music_prompts(token: &str, prompt: Vec<&str>) -> anyhow::Result<Vec<String>> {
+    let music_urls = vec![];
+
+    let mut client = ApiClient::new(token);
+
+    println!("Generating music...");
+
+    Ok(music_urls)
 }
 
 fn generate_prompt(token: &str, prompt: &str) -> anyhow::Result<String> {

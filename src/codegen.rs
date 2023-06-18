@@ -22,6 +22,7 @@ pub fn generate_proj(game: &Game, output_dir: &Path) -> Result<()> {
     copy_dir("./images", project_path.join("game/images")).unwrap();
 
     let mut file = OpenOptions::new()
+        .create(true)
         .append(true)
         .open(project_path.join("game/options.rpy"))
         .unwrap();
@@ -100,12 +101,14 @@ pub fn write_script(ctx: &mut ScriptCtx, game: &Game) -> Result<()> {
     for c in game.characters.iter() {
         ctx.write(format!(r#"define {} = Character("{}")"#, c.name, c.name))?;
         ctx.write(format!(r#"image {}_img = "{}.png""#, c.name, c.name))?;
-        // for emotion in game.characters.emotions.iter() {
-        //     ctx.write(format!(
-        //         r#"image {}_img {} = "{}_{}.png""#,
-        //         c.name, emotion, c.name, emotion
-        //     ))?;
-        // }
+        let expressions = vec!["smiling", "crying", "nervous", "excited", "blushing"];
+
+        for emotion in expressions {
+            ctx.write(format!(
+                r#"image {}_img {} = "{}_{}.png""#,
+                c.name, emotion, c.name, emotion
+            ))?;
+        }
     }
 
     ctx.write(format!("label start:"))?;
@@ -124,7 +127,6 @@ fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Resul
 
     ctx.write(format!("scene bg bg_{}:", i))?;
     ctx.indent();
-
     ctx.write(format!("zoom 2"))?;
     ctx.unindent();
 
@@ -144,15 +146,15 @@ fn gen_scene(ctx: &mut ScriptCtx, game: &Game, scene: &Scene, i: usize) -> Resul
                 };
 
                 char_pos.insert(d.speaker.clone(), position.to_string());
-                // ctx.write(format!(
-                //     "show {}_img {} at {}",
-                //     d.speaker, d.emotion, position
-                // ))?;
             }
             ctx.write(format!(
                 r#"{} "{}""#,
                 d.speaker,
                 d.content.split(": ").last().unwrap_or(d.content.as_str())
+            ))?;
+            ctx.write(format!(
+                "show {}_img {} at {}",
+                d.speaker, d.expression, char_pos[&d.speaker]
             ))?;
         } else {
             ctx.write(format!(r#""{}""#, d.content))?;
