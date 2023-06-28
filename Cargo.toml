@@ -11,6 +11,7 @@ repository = "https://github.com/PrideHacks2023/vina"
 members = [
     "crates/vina_story",
     "crates/vina_sd",
+    "crates/vina_macro",
 ]
 
 [features]

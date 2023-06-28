@@ -1,0 +1,30 @@
+[package]
+name = "vina_macro"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["MrPicklePinosaur"]
+description = ""
+repository = "https://github.com/vina-ai/vina"
+
+[features]
+
+[lib]
+proc-macro = true
+
+
+[dependencies]
+reqwest = { version = "0.11", features = ["json", "blocking"] }
+tokio = { version = "1", features = ["full"] }
+
+serde_json = "1"
+
+log = "0.4"
+env_logger = "0.10"
+
+thiserror = "1"
+anyhow = "1"
+
+# syn = { version = "1.0", features = ["full"] }
+# quote = "1.0"
+
